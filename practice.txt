@@ -1,1 +1,2 @@
-This is a git practice file。
+This is a git practice file.
+Pulled from GitHub web edit.
