@@ -2,3 +2,4 @@ This is a git practice file.
 Pulled from GitHub web edit.
 Line 3 resolved after conflict.
 Terminal practice line.
+review practice.
