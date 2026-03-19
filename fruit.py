@@ -1,2 +1,3 @@
 def favourite_fruit():
-    return []
+    return ['Apple']
+    
