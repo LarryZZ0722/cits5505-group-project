@@ -1,0 +1,46 @@
+/* ═══════════════════════════════════════════
+   tokens.css — Design tokens (CSS variables)
+═══════════════════════════════════════════ */
+
+:root {
+  --bg:           #f4f5f7;
+  --bg2:          #ffffff;
+  --bg3:          #eef0f4;
+  --surface:      #e8eaef;
+  --surface2:     #dde0e8;
+
+  --border:       #dde1ea;
+  --border2:      #c8cdd9;
+  --border3:      #adb4c7;
+
+  --text:         #111827;
+  --text2:        #4b5568;
+  --text3:        #9aa3b3;
+
+  --accent:       #2563eb;
+  --accent-dk:    #1d4ed8;
+  --accent-glow:  rgba(37, 99, 235, 0.08);
+  --accent-line:  rgba(37, 99, 235, 0.25);
+
+  --green:        #059669;
+  --green-bg:     rgba(5, 150, 105, 0.08);
+  --red:          #dc2626;
+  --red-bg:       rgba(220, 38, 38, 0.08);
+  --amber:        #d97706;
+  --amber-bg:     rgba(217, 119, 6, 0.08);
+  --purple:       #7c3aed;
+  --purple-bg:    rgba(124, 58, 237, 0.08);
+
+  --shadow:       rgba(0, 0, 0, 0.08);
+  --shadow-lg:    rgba(0, 0, 0, 0.15);
+
+  --nav-bg:       rgba(255, 255, 255, 0.9);
+
+  --mono:         'JetBrains Mono', monospace;
+  --sans:         'Instrument Sans', sans-serif;
+  --display:      'Syne', sans-serif;
+
+  --r:            8px;
+  --r-lg:         14px;
+  --r-xl:         20px;
+}

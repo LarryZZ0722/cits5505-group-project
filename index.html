@@ -6,116 +6,125 @@
   <title>UWA Timetable Planner</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,300;0,400;0,500;1,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/global.css">
-  <link rel="stylesheet" href="css/home.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        fontFamily: {
+          sans:    ['"Instrument Sans"', 'sans-serif'],
+          display: ['Syne', 'sans-serif'],
+          mono:    ['"JetBrains Mono"', 'monospace'],
+        },
+      },
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/custom.css">
 </head>
 <body>
 
-  <!-- ── Nav ── -->
-  <nav class="nav">
-    <a class="nav-logo" href="index.html">
-      <div class="nav-logo-dot"></div>
-      UWA Planner
-    </a>
-    <div class="nav-links">
-      <a class="nav-link" href="courses.html">Browse Units</a>
-      <a class="nav-link" href="selected.html">
-        My Selection <span class="nav-badge" id="selBadge" style="display:none">0</span>
-      </a>
-      <a class="nav-link" href="schedule.html">Schedule</a>
-    </div>
-    <div class="nav-right" id="navRight">
-      <button class="theme-toggle" id="themeToggle" title="Switch theme" aria-label="Switch theme">☀️</button>
-      <a class="btn" href="auth.html">Log in</a>
-      <a class="btn btn-primary" href="auth.html?tab=signup">Sign up</a>
-    </div>
-  </nav>
+  <!-- Nav injected by js/utils/components.js -->
 
   <!-- ── Hero ── -->
-  <section class="hero">
+  <section class="min-h-screen flex flex-col items-center justify-center text-center px-6 pt-20 pb-16 relative overflow-hidden">
     <div class="hero-grid-bg"></div>
     <div class="hero-orb hero-orb-1"></div>
     <div class="hero-orb hero-orb-2"></div>
 
-    <div class="hero-content page-enter">
-      <div class="hero-label">UWA Timetable Planner — 2025</div>
-      <h1 class="hero-title">Plan your semester<br><span>without the chaos.</span></h1>
-      <p class="hero-sub">Browse real UWA units, build your ideal timetable, detect clashes instantly, and share your schedule with classmates — all in one place.</p>
-      <div class="hero-cta">
+    <div class="relative z-10 w-full page-enter">
+      <!-- Label pill -->
+      <div class="inline-block font-mono text-[11px] tracking-[.12em] uppercase text-[var(--accent)] border border-[var(--accent-line)] rounded-[20px] px-[14px] py-[5px] mb-6" style="background:var(--accent-glow)">
+        UWA Timetable Planner — 2025
+      </div>
+
+      <!-- Title -->
+      <h1 class="font-display font-extrabold leading-[1.05] tracking-[-2px] text-[var(--text)] mb-5 text-[clamp(40px,7vw,80px)]">
+        Plan your semester<br><span class="text-[var(--accent)]">without the chaos.</span>
+      </h1>
+
+      <!-- Sub -->
+      <p class="text-[17px] font-light text-[var(--text2)] max-w-[520px] mx-auto mb-10 leading-[1.7]">
+        Browse real UWA units, build your ideal timetable, detect clashes instantly, and share your schedule with classmates — all in one place.
+      </p>
+
+      <!-- CTA -->
+      <div class="flex gap-3 justify-center flex-wrap mb-16">
         <a class="btn btn-primary btn-lg" href="courses.html">Browse units →</a>
         <a class="btn btn-lg" href="auth.html?tab=signup">Create account</a>
       </div>
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <div class="hero-stat-num">250+</div>
-          <div class="hero-stat-label">Units available</div>
+
+      <!-- Stats -->
+      <div class="flex gap-10 justify-center flex-wrap items-center">
+        <div class="text-center">
+          <div class="font-display text-[32px] font-extrabold text-[var(--text)]">250+</div>
+          <div class="font-mono text-[12px] text-[var(--text3)] tracking-[.04em]">Units available</div>
         </div>
-        <div class="hero-stat-divider"></div>
-        <div class="hero-stat">
-          <div class="hero-stat-num">Auto</div>
-          <div class="hero-stat-label">Clash detection</div>
+        <div class="w-px h-10 bg-[var(--border)]"></div>
+        <div class="text-center">
+          <div class="font-display text-[32px] font-extrabold text-[var(--text)]">Auto</div>
+          <div class="font-mono text-[12px] text-[var(--text3)] tracking-[.04em]">Clash detection</div>
         </div>
-        <div class="hero-stat-divider"></div>
-        <div class="hero-stat">
-          <div class="hero-stat-num">Share</div>
-          <div class="hero-stat-label">With classmates</div>
+        <div class="w-px h-10 bg-[var(--border)]"></div>
+        <div class="text-center">
+          <div class="font-display text-[32px] font-extrabold text-[var(--text)]">Share</div>
+          <div class="font-mono text-[12px] text-[var(--text3)] tracking-[.04em]">With classmates</div>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ── Features ── -->
-  <section class="features">
-    <div class="section-eyebrow">Why use it</div>
-    <h2 class="section-title">Everything you need to plan your semester</h2>
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon" style="background:var(--accent-glow)">🔍</div>
-        <div class="feature-title">Smart unit search</div>
-        <div class="feature-desc">Filter by code, name, credit points, semester, and faculty. Find exactly what you need in seconds.</div>
+  <section class="py-20 px-8 max-w-[1100px] mx-auto">
+    <div class="font-mono text-[11px] tracking-[.1em] text-[var(--text3)] uppercase mb-3">Why use it</div>
+    <h2 class="font-display text-[34px] font-bold text-[var(--text)] mb-12">Everything you need to plan your semester</h2>
+
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4">
+
+      <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-xl p-7 transition-all duration-200 hover:border-[var(--border2)] hover:-translate-y-0.5">
+        <div class="w-11 h-11 rounded-lg flex items-center justify-center text-xl mb-4" style="background:var(--accent-glow)">🔍</div>
+        <div class="font-display text-base font-bold text-[var(--text)] mb-2">Smart unit search</div>
+        <div class="text-[13px] text-[var(--text2)] leading-[1.65]">Filter by code, name, credit points, semester, and faculty. Find exactly what you need in seconds.</div>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon" style="background:var(--green-bg)">⚡</div>
-        <div class="feature-title">Instant clash detection</div>
-        <div class="feature-desc">Add units and we'll immediately flag any time conflicts — no more discovering clashes at enrolment.</div>
+
+      <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-xl p-7 transition-all duration-200 hover:border-[var(--border2)] hover:-translate-y-0.5">
+        <div class="w-11 h-11 rounded-lg flex items-center justify-center text-xl mb-4" style="background:var(--green-bg)">⚡</div>
+        <div class="font-display text-base font-bold text-[var(--text)] mb-2">Instant clash detection</div>
+        <div class="text-[13px] text-[var(--text2)] leading-[1.65]">Add units and we'll immediately flag any time conflicts — no more discovering clashes at enrolment.</div>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon" style="background:var(--amber-bg)">🎯</div>
-        <div class="feature-title">Alternative slots</div>
-        <div class="feature-desc">Multiple lab or tutorial times? Swap between them with one click to build the perfect schedule.</div>
+
+      <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-xl p-7 transition-all duration-200 hover:border-[var(--border2)] hover:-translate-y-0.5">
+        <div class="w-11 h-11 rounded-lg flex items-center justify-center text-xl mb-4" style="background:var(--amber-bg)">🎯</div>
+        <div class="font-display text-base font-bold text-[var(--text)] mb-2">Alternative slots</div>
+        <div class="text-[13px] text-[var(--text2)] leading-[1.65]">Multiple lab or tutorial times? Swap between them with one click to build the perfect schedule.</div>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon" style="background:var(--purple-bg)">🤖</div>
-        <div class="feature-title">Auto-scheduler</div>
-        <div class="feature-desc">Let our algorithm pick the best combination of time slots to minimise clashes and spread your days.</div>
+
+      <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-xl p-7 transition-all duration-200 hover:border-[var(--border2)] hover:-translate-y-0.5">
+        <div class="w-11 h-11 rounded-lg flex items-center justify-center text-xl mb-4" style="background:var(--purple-bg)">🤖</div>
+        <div class="font-display text-base font-bold text-[var(--text)] mb-2">Auto-scheduler</div>
+        <div class="text-[13px] text-[var(--text2)] leading-[1.65]">Let our algorithm pick the best combination of time slots to minimise clashes and spread your days.</div>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon" style="background:var(--green-bg)">📤</div>
-        <div class="feature-title">Share & compare</div>
-        <div class="feature-desc">Generate a shareable link and send your timetable to friends to coordinate study schedules.</div>
+
+      <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-xl p-7 transition-all duration-200 hover:border-[var(--border2)] hover:-translate-y-0.5">
+        <div class="w-11 h-11 rounded-lg flex items-center justify-center text-xl mb-4" style="background:var(--green-bg)">📤</div>
+        <div class="font-display text-base font-bold text-[var(--text)] mb-2">Share &amp; compare</div>
+        <div class="text-[13px] text-[var(--text2)] leading-[1.65]">Generate a shareable link and send your timetable to friends to coordinate study schedules.</div>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon" style="background:var(--red-bg)">📅</div>
-        <div class="feature-title">Export ready</div>
-        <div class="feature-desc">Export your final timetable as PNG or add it directly to your calendar with one click.</div>
+
+      <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-xl p-7 transition-all duration-200 hover:border-[var(--border2)] hover:-translate-y-0.5">
+        <div class="w-11 h-11 rounded-lg flex items-center justify-center text-xl mb-4" style="background:var(--red-bg)">📅</div>
+        <div class="font-display text-base font-bold text-[var(--text)] mb-2">Export ready</div>
+        <div class="text-[13px] text-[var(--text2)] leading-[1.65]">Export your final timetable as PNG or add it directly to your calendar with one click.</div>
       </div>
+
     </div>
   </section>
 
   <!-- ── Footer ── -->
-  <footer class="home-footer">
+  <footer class="border-t border-[var(--border)] px-8 py-7 flex items-center justify-between flex-wrap gap-2 font-mono text-[12px] text-[var(--text3)]">
     <span>UWA Timetable Planner — student project · CITS5505</span>
     <span>Data sourced from timetable.applications.uwa.edu.au</span>
   </footer>
 
-  <div id="toast-container"></div>
-  <!-- Utility modules (load order matters) -->
-  <script src="js/utils/theme.js"></script>
-  <script src="js/utils/state.js"></script>
-  <script src="js/utils/api.js"></script>
-  <script src="js/utils/schedule-utils.js"></script>
-  <script src="js/utils/toast.js"></script>
-  <script src="js/utils/nav.js"></script>
-  <script src="js/home.js"></script>
+  <script type="module" src="js/home.js"></script>
 </body>
 </html>

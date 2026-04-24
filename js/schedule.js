@@ -1,8 +1,12 @@
 /* ═══════════════════════════════════════════
    schedule.js — Schedule Generator page
-   Depends on: state.js, api.js, schedule-utils.js,
-               toast.js, nav.js
 ═══════════════════════════════════════════ */
+
+import State from './utils/state.js';
+import API from './utils/api.js';
+import toast from './utils/toast.js';
+import { DAYS, getColor, getActiveSessions, detectConflicts } from './utils/schedule-utils.js';
+import './utils/components.js';
 
 const SLOT_H  = 52;   // px per 1-hour row
 const START_H = 8;    // grid starts 08:00
@@ -12,11 +16,6 @@ let allCourses       = [];
 let activeDrawerCode = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  updateNavBadge();
-  renderNavUser();
-  markActiveLink();
-  initShareModal();
-
   try {
     allCourses = await API.getCourses();
   } catch {
@@ -25,6 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   renderSchedulePage();
   bindControls();
+  bindPublicToggle();
 });
 
 /* ── Full page render ────────────────────── */
@@ -45,8 +45,6 @@ function bindControls() {
   });
 
   document.getElementById('autoBtn')?.addEventListener('click', autoSchedule);
-  document.getElementById('shareBtn')?.addEventListener('click', openShare);
-  document.getElementById('copyBtn')?.addEventListener('click', copyShareLink);
 }
 
 /* ── Unit legend ─────────────────────────── */
@@ -61,10 +59,10 @@ function renderLegend() {
   el.innerHTML = selected.map(({ code }, i) => {
     const col    = getColor(i);
     const course = allCourses.find(c => c.code === code);
-    return `<div class="legend-item">
-      <div class="legend-swatch" style="background:${col.border}"></div>
-      <span class="legend-code">${code}</span>
-      <span class="legend-name">${course?.name || 'Unknown unit'}</span>
+    return `<div class="flex items-center gap-2.5">
+      <div class="w-3 h-3 rounded-full flex-shrink-0" style="background:${col.border}"></div>
+      <span class="font-mono text-[11px] font-medium text-[var(--text)]">${code}</span>
+      <span class="text-[12px] text-[var(--text2)] truncate">${course?.name || 'Unknown unit'}</span>
     </div>`;
   }).join('');
 }
@@ -216,6 +214,47 @@ function showAltDrawer(code) {
     drawer.style.display = 'none';
     activeDrawerCode     = null;
   });
+}
+
+/* ── Public / share-with-friends toggle ──── */
+function bindPublicToggle() {
+  const toggle  = document.getElementById('publicToggle');
+  const nameIn  = document.getElementById('timetableNameInput');
+  const saveBtn = document.getElementById('saveNameBtn');
+  if (!toggle) return;
+
+  const { isPublic, timetableName } = State.get();
+  toggle.checked = isPublic;
+  if (nameIn) nameIn.value = timetableName || '';
+  syncPublicUI(isPublic);
+
+  toggle.addEventListener('change', () => {
+    const { user } = State.get();
+    if (!user && toggle.checked) {
+      toggle.checked = false;
+      toast('Log in to share your timetable with friends', 'error');
+      return;
+    }
+    State.setPublic(toggle.checked);
+    syncPublicUI(toggle.checked);
+    toast(
+      toggle.checked ? 'Timetable shared with friends' : 'Timetable set to private',
+      toggle.checked ? 'success' : ''
+    );
+  });
+
+  saveBtn?.addEventListener('click', () => {
+    const name = nameIn?.value.trim();
+    if (!name) return;
+    State.setTimetableName(name);
+    if (State.get().isPublic) State.setPublic(true); // re-publish with new name
+    toast('Timetable name saved', 'success');
+  });
+}
+
+function syncPublicUI(isPublic) {
+  document.getElementById('publicStatus')?.classList.toggle('hidden', !isPublic);
+  document.getElementById('publicNameRow')?.classList.toggle('hidden', !isPublic);
 }
 
 /* ── Auto-schedule ───────────────────────── */

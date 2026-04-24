@@ -6,62 +6,61 @@
   <title>Browse Units — UWA Planner</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,300;0,400;0,500;1,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/global.css">
-  <link rel="stylesheet" href="css/courses.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        fontFamily: {
+          sans:    ['"Instrument Sans"', 'sans-serif'],
+          display: ['Syne', 'sans-serif'],
+          mono:    ['"JetBrains Mono"', 'monospace'],
+        },
+      },
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/custom.css">
 </head>
 <body>
 
-  <!-- ── Nav ── -->
-  <nav class="nav">
-    <a class="nav-logo" href="index.html">
-      <div class="nav-logo-dot"></div>
-      UWA Planner
-    </a>
-    <div class="nav-links">
-      <a class="nav-link" href="courses.html">Browse Units</a>
-      <a class="nav-link" href="selected.html">
-        My Selection <span class="nav-badge" id="selBadge" style="display:none">0</span>
-      </a>
-      <a class="nav-link" href="schedule.html">Schedule</a>
-    </div>
-    <div class="nav-right" id="navRight">
-      <button class="theme-toggle" id="themeToggle" title="Switch theme" aria-label="Switch theme">☀️</button>
-      <a class="btn" href="auth.html">Log in</a>
-      <a class="btn btn-primary" href="auth.html?tab=signup">Sign up</a>
-    </div>
-  </nav>
+  <!-- Nav injected by js/utils/components.js -->
 
-  <div class="page-shell page-enter">
-    <div class="page-header">
-      <h1 class="page-title">Browse Units</h1>
-      <p class="page-sub">Search and add units to your semester plan. Click + to add to your selection.</p>
+  <!-- ── Page shell ── -->
+  <div class="max-w-[1160px] mx-auto px-6 pt-[90px] pb-10 page-enter">
+
+    <div class="mb-7">
+      <h1 class="font-display text-[28px] font-extrabold text-[var(--text)] mb-1">Browse Units</h1>
+      <p class="text-[14px] text-[var(--text2)]">Search and add units to your semester plan. Click + to add to your selection.</p>
     </div>
 
-    <div class="courses-grid">
+    <div class="grid gap-5 items-start grid-cols-1 lg:grid-cols-[1fr_340px]">
 
       <!-- ── Left: filter + table ── -->
       <div>
-        <div class="panel">
+        <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-xl overflow-hidden">
+
           <!-- Filters -->
-          <div class="filter-bar">
+          <div class="flex gap-2 flex-wrap items-center px-5 py-4 border-b border-[var(--border)]">
             <button class="filter-chip on" data-sem="S1">Sem 1</button>
             <button class="filter-chip on" data-sem="S2">Sem 2</button>
             <button class="filter-chip" data-sem="SUM">Summer</button>
-            <span style="flex:1"></span>
-            <span style="font-family:var(--mono);font-size:11px;color:var(--text3)" id="tableCount">— units</span>
+            <span class="flex-1"></span>
+            <span class="font-mono text-[11px] text-[var(--text3)]" id="tableCount">— units</span>
           </div>
 
           <!-- Search -->
-          <div class="search-row">
-            <div class="search-wrap">
-              <svg class="search-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <div class="px-5 py-[14px] border-b border-[var(--border)]">
+            <div class="relative">
+              <svg class="absolute left-[10px] top-1/2 -translate-y-1/2 text-[var(--text3)] pointer-events-none" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                 <circle cx="6.5" cy="6.5" r="4.5"/><path d="m9.5 9.5 3.5 3.5"/>
               </svg>
-              <input type="text" id="unitSearch" placeholder="Search by code, name, or faculty…">
+              <input
+                class="w-full py-[9px] pr-3 pl-9 bg-[var(--bg3)] border border-[var(--border)] rounded text-[var(--text)] text-[13px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)]"
+                type="text" id="unitSearch" placeholder="Search by code, name, or faculty…">
             </div>
           </div>
 
-          <!-- Table -->
+          <!-- Table — row styles handled by course-table in custom.css -->
           <table class="course-table">
             <thead>
               <tr>
@@ -74,76 +73,73 @@
               </tr>
             </thead>
             <tbody id="courseTableBody">
-              <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text3)">Loading units…</td></tr>
+              <tr><td colspan="6" class="text-center py-8 text-[var(--text3)] italic">Loading units…</td></tr>
             </tbody>
           </table>
 
-          <!-- Pagination -->
-          <div class="table-foot">
-            <span class="table-count" id="tableCount">—</span>
-            <div class="pagination" id="pagination"></div>
+          <!-- Pagination footer -->
+          <div class="px-4 py-2.5 border-t border-[var(--border)] bg-[var(--bg3)] flex items-center justify-between">
+            <span class="font-mono text-[11px] text-[var(--text3)]" id="tableCountFooter">—</span>
+            <div class="flex gap-1" id="pagination"></div>
           </div>
         </div>
       </div>
 
       <!-- ── Right: basket + manual ── -->
       <div>
+
         <!-- Basket -->
-        <div class="panel" style="margin-bottom:14px">
-          <div class="panel-header">
-            <div class="panel-title">My selection</div>
+        <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-xl overflow-hidden mb-[14px]">
+          <div class="px-5 py-4 border-b border-[var(--border)] flex items-center justify-between">
+            <div class="font-display text-[15px] font-bold text-[var(--text)]">My selection</div>
             <a class="btn btn-sm btn-ghost" href="selected.html">View details →</a>
           </div>
           <div id="basketBody">
-            <div class="basket-empty">Add units from the table</div>
+            <div class="p-8 text-center text-[var(--text3)] text-[13px] italic">Add units from the table</div>
           </div>
-          <div class="basket-footer" id="basketFooter" style="display:none">
-            <div class="cp-bar-top">
+          <div class="px-4 py-[14px] border-t border-[var(--border)] bg-[var(--bg3)]" id="basketFooter" style="display:none">
+            <div class="flex justify-between font-mono text-[11px] text-[var(--text3)] mb-[5px]">
               <span id="cpLabel">0 / 24 cp</span>
               <span id="cpPercent">0%</span>
             </div>
-            <div class="cp-bar"><div class="cp-fill" id="cpFill"></div></div>
+            <div class="h-1 rounded-sm bg-[var(--border2)] overflow-hidden mb-3">
+              <div class="h-full rounded-sm" id="cpFill" style="width:0%;background:var(--accent);transition:width .4s,background .4s"></div>
+            </div>
             <a class="btn btn-primary btn-full" href="schedule.html">Generate schedule →</a>
           </div>
         </div>
 
         <!-- Manual add -->
-        <div class="panel">
-          <div class="panel-header">
-            <div class="panel-title">Add manually</div>
+        <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-xl overflow-hidden">
+          <div class="px-5 py-4 border-b border-[var(--border)] flex items-center justify-between">
+            <div class="font-display text-[15px] font-bold text-[var(--text)]">Add manually</div>
           </div>
-          <div class="panel-body">
-            <div class="form-group">
-              <label class="form-label">Unit code</label>
-              <div class="manual-row">
-                <input class="form-input" type="text" id="manualCode" placeholder="e.g. CITS3001" style="text-transform:uppercase">
+          <div class="p-5">
+            <div class="mb-4">
+              <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]">Unit code</label>
+              <div class="flex gap-2">
+                <input
+                  class="flex-1 py-2.5 px-[14px] bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text)] text-[14px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)] uppercase"
+                  type="text" id="manualCode" placeholder="e.g. CITS3001">
                 <button class="btn btn-primary" id="addManualBtn">Add</button>
               </div>
             </div>
-            <div class="form-group">
-              <label class="form-label">Semester</label>
-              <div class="sem-selector">
+            <div class="mb-4">
+              <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]">Semester</label>
+              <div class="flex gap-1.5 mb-3">
                 <button class="sem-btn on" data-sem="S1">Sem 1</button>
                 <button class="sem-btn" data-sem="S2">Sem 2</button>
                 <button class="sem-btn" data-sem="SUM">Summer</button>
               </div>
             </div>
-            <p class="hint-text">Can't find your unit? Add it manually and we'll try to fetch its timetable from UWA when connected to the backend.</p>
+            <p class="text-[11px] text-[var(--text3)] leading-[1.5]">Can't find your unit? Add it manually and we'll try to fetch its timetable from UWA when connected to the backend.</p>
           </div>
         </div>
-      </div>
 
+      </div>
     </div>
   </div>
 
-  <div id="toast-container"></div>
-  <!-- Utility modules (load order matters) -->
-  <script src="js/utils/theme.js"></script>
-  <script src="js/utils/state.js"></script>
-  <script src="js/utils/api.js"></script>
-  <script src="js/utils/schedule-utils.js"></script>
-  <script src="js/utils/toast.js"></script>
-  <script src="js/utils/nav.js"></script>
-  <script src="js/courses.js"></script>
+  <script type="module" src="js/courses.js"></script>
 </body>
 </html>

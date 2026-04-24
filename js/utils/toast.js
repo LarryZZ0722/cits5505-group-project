@@ -24,3 +24,5 @@ function toast(msg, type = '') {
   container.appendChild(el);
   setTimeout(() => el.remove(), 2200);
 }
+
+export default toast;

@@ -6,69 +6,72 @@
   <title>Login / Sign up — UWA Planner</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,300;0,400;0,500;1,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/global.css">
-  <link rel="stylesheet" href="css/auth.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        fontFamily: {
+          sans:    ['"Instrument Sans"', 'sans-serif'],
+          display: ['Syne', 'sans-serif'],
+          mono:    ['"JetBrains Mono"', 'monospace'],
+        },
+      },
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/custom.css">
 </head>
 <body>
 
-  <!-- ── Nav ── -->
-  <nav class="nav">
-    <a class="nav-logo" href="index.html">
-      <div class="nav-logo-dot"></div>
-      UWA Planner
-    </a>
-    <div class="nav-links">
-      <a class="nav-link" href="courses.html">Browse Units</a>
-      <a class="nav-link" href="selected.html">
-        My Selection <span class="nav-badge" id="selBadge" style="display:none">0</span>
-      </a>
-      <a class="nav-link" href="schedule.html">Schedule</a>
-    </div>
-    <div class="nav-right" id="navRight">
-      <button class="theme-toggle" id="themeToggle" title="Switch theme" aria-label="Switch theme">☀️</button>
-      <a class="btn" href="auth.html">Log in</a>
-      <a class="btn btn-primary" href="auth.html?tab=signup">Sign up</a>
-    </div>
-  </nav>
+  <!-- Nav injected by js/utils/components.js -->
 
   <!-- ── Auth card ── -->
-  <div class="auth-page page-enter">
-    <div class="auth-card">
+  <div class="min-h-screen flex items-center justify-center px-6 pt-20 pb-10 page-enter">
+    <div class="w-full max-w-[440px] bg-[var(--bg2)] border border-[var(--border)] rounded-xl p-9" style="box-shadow:0 24px 64px var(--shadow)">
 
       <!-- Tabs -->
-      <div class="auth-tabs">
+      <div class="flex gap-1 bg-[var(--bg3)] rounded p-1 mb-7">
         <button class="auth-tab active" id="loginTab">Log in</button>
         <button class="auth-tab" id="signupTab">Sign up</button>
       </div>
 
       <!-- ── LOGIN ── -->
       <div id="loginForm">
-        <div class="auth-title">Welcome back</div>
-        <div class="auth-sub">Log in to access your saved timetables</div>
+        <div class="font-display text-[24px] font-extrabold text-[var(--text)] mb-1">Welcome back</div>
+        <div class="text-[13px] text-[var(--text2)] mb-6">Log in to access your saved timetables</div>
 
-        <div class="form-group">
-          <label class="form-label" for="loginEmail">Email address</label>
-          <input class="form-input" type="email" id="loginEmail" placeholder="you@student.uwa.edu.au" autocomplete="email">
-          <div class="form-error" id="loginEmailErr">Please enter a valid email address</div>
+        <div class="mb-4">
+          <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]" for="loginEmail">Email address</label>
+          <input class="w-full py-2.5 px-[14px] bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text)] text-[14px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)]"
+            type="email" id="loginEmail" placeholder="you@student.uwa.edu.au" autocomplete="email">
+          <div class="text-[12px] text-[var(--red)] mt-1 hidden" id="loginEmailErr">Please enter a valid email address</div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="loginPass">Password</label>
-          <div class="input-wrap">
-            <input class="form-input" type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+        <div class="mb-4">
+          <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]" for="loginPass">Password</label>
+          <div class="relative">
+            <input class="w-full py-2.5 px-[14px] bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text)] text-[14px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)]"
+              type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
             <button class="input-eye" type="button" aria-label="Toggle password visibility">👁</button>
           </div>
         </div>
 
-        <a class="forgot-link">Forgot password?</a>
+        <a class="block text-right text-[12px] text-[var(--accent)] cursor-pointer mb-4 hover:underline">Forgot password?</a>
         <button class="btn btn-primary btn-full" id="loginBtn">Log in</button>
 
+        <div class="form-divider">or try a demo account</div>
+
+        <button class="w-full py-2.5 bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text2)] text-[13px] font-medium flex items-center justify-center gap-2 transition-all hover:border-[var(--accent-line)] hover:text-[var(--text)] mb-2.5" type="button" id="demoLoginBtn">
+          ⚡ Quick demo login
+        </button>
+
         <div class="form-divider">or continue with</div>
-        <button class="oauth-btn" type="button">
+
+        <button class="w-full py-2.5 bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text2)] text-[13px] font-medium flex items-center justify-center gap-2 transition-all hover:border-[var(--border3)] hover:text-[var(--text)] hover:bg-[var(--surface)] mb-2.5" type="button">
           <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
           Continue with Google
         </button>
-        <button class="oauth-btn" type="button">
+        <button class="w-full py-2.5 bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text2)] text-[13px] font-medium flex items-center justify-center gap-2 transition-all hover:border-[var(--border3)] hover:text-[var(--text)] hover:bg-[var(--surface)] mb-2.5" type="button">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--text2)"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
           Continue with GitHub
         </button>
@@ -76,70 +79,71 @@
 
       <!-- ── SIGNUP ── -->
       <div id="signupForm" style="display:none">
-        <div class="auth-title">Create account</div>
-        <div class="auth-sub">Start planning your perfect semester</div>
+        <div class="font-display text-[24px] font-extrabold text-[var(--text)] mb-1">Create account</div>
+        <div class="text-[13px] text-[var(--text2)] mb-6">Start planning your perfect semester</div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="signFirst">First name</label>
-            <input class="form-input" type="text" id="signFirst" placeholder="Alex" autocomplete="given-name">
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div>
+            <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]" for="signFirst">First name</label>
+            <input class="w-full py-2.5 px-[14px] bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text)] text-[14px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)]"
+              type="text" id="signFirst" placeholder="Alex" autocomplete="given-name">
           </div>
-          <div class="form-group">
-            <label class="form-label" for="signLast">Last name</label>
-            <input class="form-input" type="text" id="signLast" placeholder="Smith" autocomplete="family-name">
+          <div>
+            <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]" for="signLast">Last name</label>
+            <input class="w-full py-2.5 px-[14px] bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text)] text-[14px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)]"
+              type="text" id="signLast" placeholder="Smith" autocomplete="family-name">
           </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="signStu">Student number</label>
-          <input class="form-input" type="text" id="signStu" placeholder="21234567" maxlength="8">
-          <div class="form-error" id="stuErr">Must be 8 digits starting with 2</div>
+        <div class="mb-4">
+          <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]" for="signStu">Student number</label>
+          <input class="w-full py-2.5 px-[14px] bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text)] text-[14px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)]"
+            type="text" id="signStu" placeholder="21234567" maxlength="8">
+          <div class="text-[12px] text-[var(--red)] mt-1 hidden" id="stuErr">Must be 8 digits starting with 2</div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="signEmail">UWA email</label>
-          <input class="form-input" type="email" id="signEmail" placeholder="21234567@student.uwa.edu.au" autocomplete="email">
-          <div class="form-error" id="emailErr">Please use your @student.uwa.edu.au address</div>
+        <div class="mb-4">
+          <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]" for="signEmail">UWA email</label>
+          <input class="w-full py-2.5 px-[14px] bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text)] text-[14px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)]"
+            type="email" id="signEmail" placeholder="21234567@student.uwa.edu.au" autocomplete="email">
+          <div class="text-[12px] text-[var(--red)] mt-1 hidden" id="emailErr">Please use your @student.uwa.edu.au address</div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="signPass">Password</label>
-          <div class="input-wrap">
-            <input class="form-input" type="password" id="signPass" placeholder="Min. 8 characters" autocomplete="new-password">
+        <div class="mb-4">
+          <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]" for="signPass">Password</label>
+          <div class="relative">
+            <input class="w-full py-2.5 px-[14px] bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text)] text-[14px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)]"
+              type="password" id="signPass" placeholder="Min. 8 characters" autocomplete="new-password">
             <button class="input-eye" type="button" aria-label="Toggle password visibility">👁</button>
           </div>
-          <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
-          <div class="strength-label" id="strengthLabel"></div>
+          <!-- Strength bar -->
+          <div class="h-[3px] rounded bg-[var(--border)] mt-1.5 overflow-hidden">
+            <div class="strength-fill" id="strengthFill"></div>
+          </div>
+          <div class="font-mono text-[10px] text-[var(--text3)] mt-1" id="strengthLabel"></div>
         </div>
 
-        <div class="form-check">
-          <input type="checkbox" id="agreeCheck">
-          <label for="agreeCheck">I agree to the <a href="#">terms of service</a> and <a href="#">privacy policy</a></label>
+        <div class="flex items-start gap-2 text-[12px] text-[var(--text2)] mb-5">
+          <input type="checkbox" id="agreeCheck" class="accent-[var(--accent)] w-3.5 h-3.5 mt-0.5 flex-shrink-0">
+          <label for="agreeCheck">I agree to the <a href="#" class="text-[var(--accent)]">terms of service</a> and <a href="#" class="text-[var(--accent)]">privacy policy</a></label>
         </div>
 
         <button class="btn btn-primary btn-full" id="signupBtn">Create account</button>
 
         <div class="form-divider">or continue with</div>
-        <button class="oauth-btn" type="button">
+
+        <button class="w-full py-2.5 bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text2)] text-[13px] font-medium flex items-center justify-center gap-2 transition-all hover:border-[var(--border3)] hover:text-[var(--text)] hover:bg-[var(--surface)] mb-2.5" type="button">
           <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
           Continue with Google
         </button>
       </div>
 
-      <div class="auth-footer" id="authFooter">
-        Don't have an account? <a id="switchToSignupLink">Sign up free</a>
+      <div class="text-center text-[12px] text-[var(--text3)] mt-4" id="authFooter">
+        Don't have an account? <a class="text-[var(--accent)] cursor-pointer" id="switchToSignupLink">Sign up free</a>
       </div>
     </div>
   </div>
 
-  <div id="toast-container"></div>
-  <!-- Utility modules (load order matters) -->
-  <script src="js/utils/theme.js"></script>
-  <script src="js/utils/state.js"></script>
-  <script src="js/utils/api.js"></script>
-  <script src="js/utils/schedule-utils.js"></script>
-  <script src="js/utils/toast.js"></script>
-  <script src="js/utils/nav.js"></script>
-  <script src="js/auth.js"></script>
+  <script type="module" src="js/auth.js"></script>
 </body>
 </html>

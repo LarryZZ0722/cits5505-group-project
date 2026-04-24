@@ -116,3 +116,5 @@ function getDaysUsed(selected, courses) {
   });
   return days.size;
 }
+
+export { DAYS, PALETTE, getColor, getActiveSessions, detectConflicts, getTotalCp, getDaysUsed };

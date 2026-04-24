@@ -32,3 +32,5 @@ const API = {
     return courses.find(c => c.code === code) ?? null;
   },
 };
+
+export default API;

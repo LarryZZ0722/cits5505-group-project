@@ -1,8 +1,13 @@
 /* ═══════════════════════════════════════════
    courses.js — Course Input / Browse page
-   Depends on: state.js, api.js, schedule-utils.js,
-               toast.js, nav.js
 ═══════════════════════════════════════════ */
+
+import State from './utils/state.js';
+import API from './utils/api.js';
+import toast from './utils/toast.js';
+import { DAYS, getColor, getTotalCp } from './utils/schedule-utils.js';
+import { updateNavBadge } from './utils/nav.js';
+import './utils/components.js';
 
 let allCourses  = [];
 let activeSems  = ['S1', 'S2'];
@@ -11,9 +16,6 @@ let manualSem   = 'S1';
 const PAGE_SIZE = 8;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  updateNavBadge();
-  renderNavUser();
-  markActiveLink();
   await loadCourses();
   bindFilters();
   bindSearch();
@@ -84,24 +86,32 @@ function renderTable() {
   renderPagination(courses.length);
 }
 
+const TYPE_TAG_CLS = {
+  lec: 'bg-blue-500/10 border-blue-500/30 text-blue-400',
+  lab: 'bg-purple-500/10 border-purple-500/30 text-purple-400',
+  tut: 'bg-green-500/10 border-green-500/30 text-green-400',
+};
+const TAG_BASE = 'inline-flex items-center px-[7px] py-[2px] rounded-md text-[10px] font-mono border';
+
 function buildTableRow(c) {
   const isAdded = State.hasCourse(c.code);
-  const tags    = c.sessions.map(s =>
-    `<span class="tag tag-${s.type.toLowerCase()}">${s.type} ${DAYS[s.day].slice(0, 3)}</span>`
-  ).join('');
-  const sems    = c.sems.map(s =>
-    `<span class="tag tag-sem">${s}</span>`
+  const tags    = c.sessions.map(s => {
+    const cls = TYPE_TAG_CLS[s.type.toLowerCase()] || 'border-[var(--border2)] text-[var(--text2)] bg-[var(--bg3)]';
+    return `<span class="${TAG_BASE} ${cls}">${s.type} ${DAYS[s.day].slice(0, 3)}</span>`;
+  }).join('');
+  const sems = c.sems.map(s =>
+    `<span class="${TAG_BASE} bg-[var(--accent-glow)] border-[var(--accent-line)] text-[var(--accent)]">${s}</span>`
   ).join('');
 
   return `<tr class="${isAdded ? 'row-selected' : ''}">
-    <td class="col-code">${c.code}</td>
+    <td class="font-mono text-[12px] font-medium text-[var(--text)]">${c.code}</td>
     <td>
-      <div class="col-name">${c.name}</div>
-      <div class="col-faculty">${c.faculty}</div>
+      <div class="font-medium text-[13px] text-[var(--text)]">${c.name}</div>
+      <div class="text-[11px] text-[var(--text3)] mt-0.5">${c.faculty}</div>
     </td>
-    <td><span class="cp-badge">${c.cp} cp</span></td>
-    <td><div class="tag-row">${sems}</div></td>
-    <td><div class="tag-row">${tags}</div></td>
+    <td><span class="font-mono text-[10px] px-[7px] py-0.5 rounded-md border border-[var(--border2)] bg-[var(--bg3)] text-[var(--text2)] whitespace-nowrap">${c.cp} cp</span></td>
+    <td><div class="flex flex-wrap gap-1">${sems}</div></td>
+    <td><div class="flex flex-wrap gap-1">${tags}</div></td>
     <td>
       <button class="add-row-btn ${isAdded ? 'added' : ''}" data-code="${c.code}"
         title="${isAdded ? 'Remove from selection' : 'Add to selection'}">
@@ -149,7 +159,7 @@ function renderBasket() {
   if (!body) return;
 
   if (!selected.length) {
-    body.innerHTML        = '<div class="basket-empty">Add units from the table</div>';
+    body.innerHTML        = '<div class="p-8 text-center text-[var(--text3)] text-[13px] italic">Add units from the table</div>';
     if (footer) footer.style.display = 'none';
     return;
   }
@@ -166,18 +176,18 @@ function renderBasket() {
   fill.style.width      = pct + '%';
   fill.style.background = cp > 24 ? 'var(--red)' : cp >= 18 ? 'var(--green)' : 'var(--accent)';
 
-  body.innerHTML = `<div class="basket-list">${
+  body.innerHTML = `<div class="flex flex-col gap-2">${
     selected.map(({ code }, i) => {
       const c   = allCourses.find(x => x.code === code);
       const col = getColor(i);
-      return `<div class="basket-item">
-        <div class="basket-dot" style="background:${col.border}"></div>
-        <div class="basket-info">
-          <div class="basket-code">${code}</div>
-          <div class="basket-name">${c ? c.name : 'Custom unit'}</div>
+      return `<div class="flex items-center gap-2.5">
+        <div class="w-2 h-2 rounded-full flex-shrink-0" style="background:${col.border}"></div>
+        <div class="flex-1 min-w-0">
+          <div class="font-mono text-[11px] font-medium text-[var(--text)]">${code}</div>
+          <div class="text-[11px] text-[var(--text3)] truncate">${c ? c.name : 'Custom unit'}</div>
         </div>
-        <div class="basket-cp">${c ? c.cp + ' cp' : ''}</div>
-        <button class="rm-btn" data-code="${code}" aria-label="Remove ${code}">×</button>
+        <div class="text-[10px] font-mono text-[var(--text3)] whitespace-nowrap">${c ? c.cp + ' cp' : ''}</div>
+        <button class="w-5 h-5 rounded flex items-center justify-center border-0 bg-transparent text-[var(--text3)] text-[14px] cursor-pointer hover:text-[var(--red)] hover:bg-[var(--red-bg)] flex-shrink-0 rm-btn" data-code="${code}" aria-label="Remove ${code}">×</button>
       </div>`;
     }).join('')
   }</div>`;

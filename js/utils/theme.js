@@ -6,23 +6,23 @@
 ═══════════════════════════════════════════ */
 
 const Theme = {
-  _key: 'uwa_theme',
+  _key: "uwa_theme",
 
   /** Get current theme ('dark' | 'light') */
   get() {
-    return localStorage.getItem(this._key) || 'dark';
+    return localStorage.getItem(this._key) || "dark";
   },
 
   /** Set theme and persist */
   set(theme) {
     localStorage.setItem(this._key, theme);
-    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute("data-theme", theme);
     this._syncButton(theme);
   },
 
   /** Toggle between dark and light */
   toggle() {
-    this.set(this.get() === 'dark' ? 'light' : 'dark');
+    this.set(this.get() === "dark" ? "light" : "dark");
   },
 
   /**
@@ -32,20 +32,24 @@ const Theme = {
    */
   init() {
     const theme = this.get();
-    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute("data-theme", theme);
     // Update button icon once the DOM exists
-    document.addEventListener('DOMContentLoaded', () => this._syncButton(theme));
+    document.addEventListener("DOMContentLoaded", () =>
+      this._syncButton(theme),
+    );
   },
 
   /** Update the toggle button icon and aria-label */
   _syncButton(theme) {
-    const btn = document.getElementById('themeToggle');
+    const btn = document.getElementById("themeToggle");
     if (!btn) return;
-    btn.textContent = theme === 'dark' ? '☀️' : '🌙';
-    btn.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
-    btn.setAttribute('aria-label', btn.title);
+    btn.textContent = theme === "dark" ? "☀️" : "🌙";
+    btn.title =
+      theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
+    btn.setAttribute("aria-label", btn.title);
   },
 };
 
-// Apply theme immediately — before first paint
-Theme.init();
+// Theme flash prevention is handled by the inline <script> in each page's <head>.
+// See the data-theme attribute set before first paint.
+export default Theme;

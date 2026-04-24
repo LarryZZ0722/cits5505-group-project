@@ -1,6 +1,6 @@
-# CITS5505 Group Project — Pre-Meeting Plan
+# CITS5505 Group Project — Implementation Plan
 **Application: UWA Timetable Planner**
-Branch: `hung` | Last updated: 2026-04-16
+Branch: `hung` | Last updated: 2026-04-21
 
 ---
 
@@ -8,17 +8,15 @@ Branch: `hung` | Last updated: 2026-04-16
 
 **UWA Timetable Planner** is a web application that lets UWA students browse real unit offerings, build a conflict-free weekly timetable, swap between alternative lab/tutorial slots, and share their schedule with classmates — all before enrolment day.
 
-Key value propositions (from the live front-end):
+Key features:
 - Search 250+ units by code, name, faculty, credit points, and semester
 - Instant clash detection when adding units
 - Auto-scheduler that picks the best slot combination based on user preferences
-- Shareable timetable link (view-only, expires in 30 days)
-- Export timetable as PNG or to calendar
+- Friend system — send/accept requests, view friends' public timetables
 
 ---
 
 ## 2. User Stories
-
 
 | # | As a… | I want to… | So that… |
 |---|--------|------------|----------|
@@ -27,74 +25,119 @@ Key value propositions (from the live front-end):
 | 3 | UWA student | add a unit to my selection with one click | I can build my semester basket quickly and intuitively |
 | 4 | UWA student | see an instant warning when two of my units clash in time | I know about conflicts before I head to enrolment |
 | 5 | UWA student | swap between alternative lab/tutorial times for a unit | I can manually resolve clashes without dropping the unit entirely |
-| 6 | UWA student | use the Auto-schedule button with preferences (avoid 8am, free Fridays) | I get a suggested conflict-free timetable without manually trying every combination |
-| 7 | UWA student | add custom time blocks for personal commitments (work, study) | the auto-scheduler generates options that respect my entire real-life schedule |
-| 8 | UWA student | get AI-powered suggestions for alternative units when I have an unresolvable clash | I can easily swap in a new unit that fits my schedule without starting from scratch |
-| 9 | UWA student | save multiple named timetables (e.g., "Plan A", "Plan B") | I can compare different unit combinations before making a final decision |
-| 10 | UWA student | export my final timetable as a PNG image | I have an offline, portable copy to reference during my week |
-
-## 3. Main Pages
-
-| Page | File | Purpose |
-|------|------|---------|
-| **Home / Landing** | `index.html` | Marketing hero, feature highlights, entry points to browse and sign up |
-| **Browse Units** | `courses.html` | Search and filter unit catalogue; add units to selection basket |
-| **My Selection** | `selected.html` | Review selected units, see conflict warnings, remove units |
-| **Schedule Generator** | `schedule.html` | Interactive weekly timetable grid; auto-schedule; slot alternatives; share/export |
-| **Login / Sign up** | `auth.html` | Tabbed auth card with email/password forms + Google/GitHub OAuth buttons |
-| **Shared Timetable** *(planned)* | `shared.html` | Read-only view of another user's timetable via share code (no login required) |
+| 6 | UWA student | use the Auto-schedule button with preferences (avoid 8am, free Fridays, compact days) | I get a suggested conflict-free timetable without manually trying every combination |
+| 7 | UWA student | send and accept friend requests by student number | I can connect with classmates |
+| 8 | UWA student | view a friend's public timetable | I can coordinate shared free periods and avoid scheduling conflicts with friends |
+| 9 | UWA student | control whether my timetable is visible to friends | I keep my schedule private by default |
+| 10 | UWA student | log in and have my selections saved across sessions | I don't lose my timetable when I close the tab |
+| 11 | UWA student | update my display name and student number on my profile | my friends see the correct identity when I send requests |
+| 12 | UWA student | change my password from my profile page | I can keep my account secure without contacting support |
 
 ---
 
-## 4. CSS Framework
+## 3. Pages
 
-**Custom CSS (no third-party framework)**
+| Page | File | Status |
+|------|------|--------|
+| **Home / Landing** | `index.html` | ✅ Built |
+| **Browse Units** | `courses.html` | ✅ Built |
+| **My Selection** | `selected.html` | ✅ Built |
+| **Schedule Generator** | `schedule.html` | ✅ Built |
+| **Login / Sign up** | `auth.html` | ✅ Built |
+| **Friends** | `friends.html` | ✅ Built |
+| **Profile** | `profile.html` | ⬜ Planned |
 
-The project uses a hand-rolled design system located in [css/](css/):
+---
+
+## 4. Architecture
+
+### CSS
+
+Two-file CSS system — no separate per-page files:
 
 | File | Responsibility |
 |------|---------------|
-| `css/base/tokens.css` | Design tokens — colours, spacing, radius, shadows |
-| `css/base/reset.css` | Normalise browser defaults |
-| `css/base/theme.css` | Dark / light mode via `data-theme` attribute |
-| `css/base/animations.css` | Page-enter and micro-interaction keyframes |
-| `css/base/buttons.css` | `.btn`, `.btn-primary`, `.btn-sm`, `.btn-ghost` variants |
-| `css/base/forms.css` | Inputs, labels, error states, strength bar |
-| `css/base/nav.css` | Sticky top nav, logo, badge, avatar |
-| `css/base/components.css` | Shared panel, card, toast, modal, overlay |
-| `css/global.css` | Imports all base files + page-shell layout |
-| `css/home.css` | Hero, features grid, stats, footer |
-| `css/courses.css` | Two-column layout, table, filter chips, basket |
-| `css/schedule.css` | Timetable grid, control card, legend, share modal |
-| `css/selected.css` | Unit cards grid, summary bar, conflict alert |
-| `css/auth.css` | Centred auth card, tabs, OAuth buttons, strength bar |
+| `css/tokens.css` | Design tokens — colours, spacing, radius, shadows, dark/light theme vars |
+| `css/custom.css` | All non-Tailwind styles: resets, keyframes, component classes referenced by JS, mobile responsive rules |
 
-**Google Fonts used:**
-- `Syne` (700/800) — headings and logo
-- `Instrument Sans` (300–500, italic) — body text
-- `JetBrains Mono` (400/500) — code labels (unit codes, times, CP counts)
+**Tailwind CSS CDN** (`https://cdn.tailwindcss.com`) handles all layout, spacing, and responsive utilities in HTML. Dark mode is via `['selector', '[data-theme="dark"]']`. Custom fonts (Syne, Instrument Sans, JetBrains Mono) via Google Fonts.
 
-> **Rationale for no framework:** A custom token-based system keeps the bundle minimal, makes dark-mode trivial via a single attribute swap, and avoids Bootstrap/Tailwind class-name noise in the HTML — important for a code-reviewed student project.
+### JavaScript — ES Modules
+
+All JS files use `type="module"`. No global scope. Files import from each other explicitly.
+
+| File | Responsibility |
+|------|---------------|
+| `js/utils/state.js` | Single localStorage state store — selected units, user, friends, sent requests, timetable sharing |
+| `js/utils/api.js` | `getCourses()` — loads `data/courses.json` |
+| `js/utils/components.js` | **Side-effect import** — injects nav (CSS Grid centered), mobile sidebar + FAB trigger, toast container. Owns per-page nav init. |
+| `js/utils/nav.js` | `updateNavBadge`, `renderNavUser`, `markActiveLink` |
+| `js/utils/theme.js` | Dark/light toggle, FOUC prevention via inline `<head>` script |
+| `js/utils/toast.js` | Toast notification helper |
+| `js/utils/schedule-utils.js` | `DAYS`, `PALETTE`, `getColor`, `getActiveSessions`, `detectConflicts`, `getTotalCp`, `getDaysUsed` |
+| `js/home.js` | Imports components (nav only) |
+| `js/auth.js` | Login / sign-up forms, demo login, tab switching |
+| `js/courses.js` | Unit table, filters, search, pagination, basket |
+| `js/selected.js` | Unit cards, conflict detection, summary bar |
+| `js/schedule.js` | Timetable grid, auto-schedule, preferences, slot alternatives, friend visibility toggle |
+| `js/friends.js` | Friend requests (send/pending/accept/cancel), friend list, timetable modal |
+| `js/profile.js` | Display name / student number update, password change form |
+
+### Nav / Mobile
+
+- **Desktop (≥ 768px):** CSS Grid nav — logo left, links centered, user/auth right
+- **Mobile (< 768px):** Nav shows logo + user only. A floating pill button (left-center edge of screen) opens a slide-in sidebar drawer with all nav links + user info/auth buttons
+
+### Friend Request Flow
+
+Simulated with localStorage (no backend yet):
+- `sendFriendRequest(target)` → writes to target's `uwa_planner_inbox_${sn}`
+- `checkInbox()` → reads own inbox on page load, moves to `friendRequests`
+- `acceptFriendRequest()` → writes to sender's `uwa_planner_accepted_${sn}`
+- `checkAccepted()` → reads accepted notifications, moves to `friends`
+- Sent requests show as **⏳ Pending** until accepted; can be cancelled
 
 ---
 
-## 5. Current Progress (branch `hung`)
+## 5. Progress
 
-All front-end static pages have been sketched:
+### Completed
+- [x] All 6 HTML pages built (index, auth, courses, selected, schedule, friends)
+- [x] `data/data-model.json` — API contract agreed with Flask back-end team
+- [x] `data/courses.json` — 250+ sample units for front-end development
+- [x] Full JS utility module suite (state, api, theme, toast, nav, schedule-utils)
+- [x] DRY nav via `components.js` — nav injected once, never written per-page
+- [x] ES module architecture — all files use `type="module"`, explicit imports
+- [x] Friend system — send/pending/accept/cancel flow with localStorage simulation
+- [x] Mobile sidebar with floating FAB trigger (< 768px)
+- [x] Responsive layouts on all pages (Tailwind grid breakpoints)
+- [x] Dark / light theme with FOUC prevention (inline head script)
+- [x] Auto-schedule with preferences (avoid 8am, compact days, free Fridays)
+- [x] Public timetable toggle with friend visibility control
 
-- [x] `index.html` — Home page with hero, 6-feature grid, stats, footer
-- [x] `auth.html` — Login + Sign up tabs, Google/GitHub OAuth placeholders, password strength bar
-- [x] `courses.html` — Unit table with filters, search, basket sidebar, manual-add panel
-- [x] `selected.html` — Unit cards, conflict alert banner, empty state
-- [x] `schedule.html` — Weekly timetable grid, auto-schedule button, preferences panel, slot alternatives drawer, share modal
-- [x] `data/data-model.json` — Full API contract (schemas + endpoints) agreed between front-end and Flask back-end
-- [x] `data/courses.json` — Sample unit data for front-end development
-- [x] JS utility modules (`state.js`, `api.js`, `schedule-utils.js`, `theme.js`, `toast.js`, `nav.js`)
-- [ ] Flask back-end (not started — intentionally waiting until after mid-semester break)
-- [ ] `shared.html` — Shared timetable view (planned)
-- [ ] PNG export (UI wired, logic pending)
-- [ ] OAuth integration (buttons present, wired after back-end)
+### In Progress / Pending
+- [ ] `profile.html` — display name / student number update, password change
+- [ ] Flask back-end (intentionally deferred until after mid-semester break)
+- [ ] OAuth (Google/GitHub buttons present, wired after back-end)
+- [ ] Replace localStorage friend simulation with real API calls
 
 ---
 
-*This document covers the pre-meeting deliverables for CITS5505 Group Project.*
+## 6. Flask Back-end Plan (post mid-sem)
+
+Endpoints defined in `data/data-model.json`:
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/auth/register` | POST | Create account |
+| `/api/auth/login` | POST | Log in, return session |
+| `/api/units` | GET | Return unit catalogue |
+| `/api/timetable` | GET / POST | Save / load user timetable |
+| `/api/friends` | GET / POST / DELETE | Friend list management |
+| `/api/friends/requests` | GET / POST | Incoming / outgoing requests |
+| `/api/profile` | GET / PUT | Fetch and update display name, student number |
+| `/api/auth/password` | PUT | Change password (requires current password) |
+
+---
+
+*Branch: `hung` — front-end only until back-end integration sprint.*
