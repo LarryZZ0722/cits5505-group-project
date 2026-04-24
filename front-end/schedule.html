@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schedule Generator — UWA Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,300;0,400;0,500;1,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        fontFamily: {
+          sans:    ['"Instrument Sans"', 'sans-serif'],
+          display: ['Syne', 'sans-serif'],
+          mono:    ['"JetBrains Mono"', 'monospace'],
+        },
+      },
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+<body>
+
+  <!-- Nav injected by js/utils/components.js -->
+
+  <!-- ── Page shell ── -->
+  <div class="max-w-[1160px] mx-auto px-6 pt-[90px] pb-10 page-enter">
+
+    <!-- Header -->
+    <div class="flex items-start justify-between flex-wrap gap-3 mb-7">
+      <div>
+        <h1 class="font-display text-[28px] font-extrabold text-[var(--text)] mb-1">Schedule Generator</h1>
+        <p class="text-[14px] text-[var(--text2)]">Arrange your units into a conflict-free weekly timetable.</p>
+      </div>
+      <div class="flex gap-2 flex-shrink-0">
+        <button class="btn btn-green" id="autoBtn">⚡ Auto-schedule</button>
+      </div>
+    </div>
+
+    <!-- Two-column layout -->
+    <div class="grid gap-5 items-start grid-cols-1 lg:grid-cols-[240px_1fr]">
+
+      <!-- ── Left: controls ── -->
+      <div>
+
+        <!-- Preferences card -->
+        <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-xl overflow-hidden mb-3">
+
+          <!-- Preferences section -->
+          <div class="px-4 py-[14px] border-b border-[var(--border)]">
+            <div class="font-mono text-[10px] tracking-[.08em] uppercase text-[var(--text3)] mb-2.5">Preferences</div>
+
+            <div class="flex items-center justify-between mb-2 text-[12px] text-[var(--text2)]">
+              <span>Avoid 8am starts</span>
+              <label class="toggle">
+                <input type="checkbox" id="prefNo8" checked>
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+            <div class="flex items-center justify-between mb-2 text-[12px] text-[var(--text2)]">
+              <span>Compact days</span>
+              <label class="toggle">
+                <input type="checkbox" id="prefCompact">
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+            <div class="flex items-center justify-between text-[12px] text-[var(--text2)]">
+              <span>Free Fridays</span>
+              <label class="toggle">
+                <input type="checkbox" id="prefFri">
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Earliest start section -->
+          <div class="px-4 py-[14px] border-b border-[var(--border)]">
+            <div class="font-mono text-[10px] tracking-[.08em] uppercase text-[var(--text3)] mb-2.5">Earliest start</div>
+            <div class="mt-2">
+              <input type="range" min="8" max="12" value="9" id="startRange" class="w-full accent-[var(--accent)] cursor-pointer">
+              <div class="flex justify-between font-mono text-[10px] text-[var(--text3)] mt-1">
+                <span id="startVal">9:00</span>
+                <span>12:00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slot alternatives section -->
+          <div class="px-4 py-[14px]">
+            <div class="font-mono text-[10px] tracking-[.08em] uppercase text-[var(--text3)] mb-2.5">Slot alternatives</div>
+            <!-- .variant-list, .variant-btn rendered by JS (custom.css) -->
+            <div class="variant-list" id="variantList">
+              <div class="text-[12px] text-[var(--text3)]">Loading…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Legend card -->
+        <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-xl overflow-hidden">
+          <div class="px-4 py-[14px]">
+            <div class="font-mono text-[10px] tracking-[.08em] uppercase text-[var(--text3)] mb-2.5">Unit legend</div>
+            <!-- .legend-list, .legend-item rendered by JS (custom.css) -->
+            <div class="legend-list" id="legendList">
+              <div class="text-[12px] text-[var(--text3)]">No units selected</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Right: timetable ── -->
+      <div>
+
+        <!-- Status bar — JS sets .conflict / .clear class (custom.css) -->
+        <div class="status-bar" id="statusBar">
+          <span>●</span>
+          <span id="statusText"></span>
+        </div>
+
+        <!-- Timetable wrapper -->
+        <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-xl overflow-hidden">
+
+          <!-- Top bar -->
+          <div class="px-5 py-[14px] border-b border-[var(--border)] flex items-center gap-3">
+            <div class="font-display text-[15px] font-bold text-[var(--text)]">Weekly view — Semester 1, 2025</div>
+            <div class="ml-auto flex gap-2">
+              <a class="btn btn-sm btn-ghost text-[11px]" href="courses.html">+ Add units</a>
+            </div>
+          </div>
+
+          <!-- Grid — .tt-scroll, .tt-grid, .tt-head, .tt-body, .tt-time, .tt-cell in custom.css -->
+          <div class="tt-scroll">
+            <div class="tt-grid">
+              <div class="tt-head">
+                <div class="tt-head-cell">TIME</div>
+                <div class="tt-head-cell">MON</div>
+                <div class="tt-head-cell">TUE</div>
+                <div class="tt-head-cell">WED</div>
+                <div class="tt-head-cell">THU</div>
+                <div class="tt-head-cell">FRI</div>
+              </div>
+              <!-- Rows rendered by JS -->
+              <div class="tt-body" id="ttBody"></div>
+            </div>
+          </div>
+
+          <!-- Alt drawer — injected by JS (.alt-drawer etc. in custom.css) -->
+          <div id="altDrawer" style="display:none"></div>
+        </div>
+
+      </div>
+    </div>
+    <!-- ── Share with friends toggle ── -->
+    <div class="mt-5 bg-[var(--bg2)] border border-[var(--border)] rounded-xl p-5">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <div class="font-display text-[15px] font-bold text-[var(--text)] mb-1">Share with friends</div>
+          <div class="text-[13px] text-[var(--text2)]">Make this timetable visible to friends on your list.</div>
+        </div>
+        <label class="toggle flex-shrink-0">
+          <input type="checkbox" id="publicToggle">
+          <div class="toggle-track"></div>
+        </label>
+      </div>
+      <!-- Status row shown when public -->
+      <div id="publicStatus" class="hidden mt-3 flex items-center gap-2 text-[13px] text-[var(--green)]">
+        <span>✓</span>
+        <span>Your friends can now see your timetable. <a href="friends.html" class="text-[var(--accent)] hover:underline">Manage friends →</a></span>
+      </div>
+      <!-- Name input shown when public -->
+      <div id="publicNameRow" class="hidden mt-3 flex gap-2 items-center">
+        <input
+          class="flex-1 py-2 px-3 bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text)] text-[13px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)]"
+          type="text" id="timetableNameInput" placeholder="Name this timetable (e.g. Semester 1 Plan)">
+        <button class="btn btn-sm btn-primary" id="saveNameBtn">Save</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module" src="js/schedule.js"></script>
+</body>
+</html>

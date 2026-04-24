@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Friends — UWA Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,300;0,400;0,500;1,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        fontFamily: {
+          sans:    ['"Instrument Sans"', 'sans-serif'],
+          display: ['Syne', 'sans-serif'],
+          mono:    ['"JetBrains Mono"', 'monospace'],
+        },
+      },
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+<body>
+
+  <!-- Nav injected by js/utils/components.js -->
+
+  <!-- ── Page shell ── -->
+  <div class="max-w-[1000px] mx-auto px-6 pt-[90px] pb-10 page-enter">
+
+    <!-- Header -->
+    <div class="flex items-start justify-between flex-wrap gap-3 mb-7">
+      <div>
+        <h1 class="font-display text-[28px] font-extrabold text-[var(--text)] mb-1">Friends</h1>
+        <p class="text-[14px] text-[var(--text2)]">Add friends to see their public timetables and coordinate your schedule.</p>
+      </div>
+    </div>
+
+    <!-- Not logged in warning -->
+    <div id="guestBanner" class="hidden mb-6 flex items-center gap-3 bg-[var(--amber-bg)] border border-[rgba(245,166,35,0.3)] rounded-lg px-5 py-4 text-[13px] text-[var(--amber)]">
+      <span class="text-[18px]">⚠️</span>
+      <span>You need to <a href="auth.html" class="underline font-medium">log in</a> to add friends and see shared timetables.</span>
+    </div>
+
+    <!-- Two-column layout -->
+    <div class="grid gap-6 items-start grid-cols-1 md:grid-cols-[1fr_320px]">
+
+      <!-- ── Left: friend requests + friends list ── -->
+      <div class="flex flex-col gap-5">
+
+        <!-- Incoming friend requests -->
+        <div id="requestsSection" class="hidden">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="font-display text-[17px] font-bold text-[var(--text)]">Friend requests</div>
+            <span class="min-w-[16px] h-4 rounded-xl px-1 bg-[var(--accent)] text-white font-mono text-[9px] inline-flex items-center justify-center" id="reqCount">0</span>
+          </div>
+          <div class="flex flex-col gap-3" id="requestsList"></div>
+        </div>
+
+        <!-- Sent requests (pending) -->
+        <div id="sentSection" class="hidden">
+          <div class="font-display text-[17px] font-bold text-[var(--text)] mb-3">Sent requests</div>
+          <div class="flex flex-col gap-3" id="sentList"></div>
+        </div>
+
+        <!-- Friends list -->
+        <div>
+          <div class="font-display text-[17px] font-bold text-[var(--text)] mb-3">My friends</div>
+          <div class="flex flex-col gap-3" id="friendsList">
+            <!-- populated by JS -->
+          </div>
+          <!-- Empty state -->
+          <div id="friendsEmpty" class="hidden text-center py-12 bg-[var(--bg2)] border border-[var(--border)] rounded-xl">
+            <div class="text-[36px] opacity-30 mb-3">👥</div>
+            <div class="font-display text-[16px] font-bold text-[var(--text2)] mb-1">No friends yet</div>
+            <div class="text-[13px] text-[var(--text3)]">Add a friend using their student number to see their public timetable.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Right: add friend card ── -->
+      <div class="flex flex-col gap-4">
+
+        <!-- Add friend -->
+        <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-xl p-5">
+          <div class="font-display text-[15px] font-bold text-[var(--text)] mb-4">Add a friend</div>
+
+          <div class="mb-3">
+            <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]">Student number</label>
+            <input
+              class="w-full py-2.5 px-[14px] bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text)] text-[14px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)]"
+              type="text" id="addStudentNum" placeholder="e.g. 21234567" maxlength="8">
+            <div class="text-[12px] text-[var(--red)] mt-1 hidden" id="addErr"></div>
+          </div>
+
+          <button class="btn btn-primary btn-full" id="addFriendBtn">Send friend request</button>
+          <p class="text-[11px] text-[var(--text3)] leading-[1.5] mt-3">Enter a student number to send a request. They must accept before appearing in your friends list.</p>
+        </div>
+
+        <!-- Your privacy status -->
+        <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-xl p-5">
+          <div class="font-display text-[15px] font-bold text-[var(--text)] mb-1">Your timetable</div>
+          <div class="text-[13px] text-[var(--text2)] mb-4">Control who can see your schedule.</div>
+
+          <div id="myPrivacyStatus">
+            <div class="flex items-center justify-between text-[13px]">
+              <span class="text-[var(--text2)]">Visible to friends</span>
+              <span id="myPublicBadge" class="inline-flex items-center gap-1 font-mono text-[10px] px-[7px] py-0.5 rounded-lg bg-[var(--bg3)] border border-[var(--border2)] text-[var(--text3)]">🔒 Private</span>
+            </div>
+            <a class="btn btn-sm w-full justify-center mt-3" href="schedule.html">
+              Manage in Schedule →
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Friend timetable modal ── -->
+  <div class="overlay fixed inset-0 z-[100] flex items-center justify-center" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px)" id="ttModal">
+    <div class="modal bg-[var(--bg2)] border border-[var(--border2)] rounded-xl w-[680px] max-w-[95vw] max-h-[85vh] flex flex-col overflow-hidden" style="box-shadow:0 32px 80px var(--shadow-lg)">
+
+      <!-- Modal header -->
+      <div class="px-5 py-4 border-b border-[var(--border)] flex items-center gap-3">
+        <div id="ttModalAvatar" class="w-10 h-10 rounded-full bg-[var(--accent-glow)] border border-[var(--accent-line)] flex items-center justify-center font-mono text-[14px] font-medium text-[var(--accent)] flex-shrink-0">?</div>
+        <div class="flex-1 min-w-0">
+          <div class="font-display text-[15px] font-bold text-[var(--text)]" id="ttModalName">Friend</div>
+          <div class="text-[12px] text-[var(--text3)] mt-0.5" id="ttModalMeta">Semester 1 · Public</div>
+        </div>
+        <button class="bg-transparent border-none text-[var(--text3)] text-[22px] leading-none cursor-pointer hover:text-[var(--text)]" id="ttModalClose">×</button>
+      </div>
+
+      <!-- Timetable grid (read-only) -->
+      <div class="overflow-auto flex-1">
+        <div class="tt-scroll p-4">
+          <div class="tt-grid" id="ttModalGrid">
+            <div class="tt-head">
+              <div class="tt-head-cell">TIME</div>
+              <div class="tt-head-cell">MON</div>
+              <div class="tt-head-cell">TUE</div>
+              <div class="tt-head-cell">WED</div>
+              <div class="tt-head-cell">THU</div>
+              <div class="tt-head-cell">FRI</div>
+            </div>
+            <div class="tt-body" id="ttModalBody"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unit list -->
+      <div class="px-5 py-4 border-t border-[var(--border)] bg-[var(--bg3)]">
+        <div class="font-mono text-[10px] uppercase tracking-[.08em] text-[var(--text3)] mb-2">Units</div>
+        <div class="flex gap-2 flex-wrap" id="ttModalUnits"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/friends.js"></script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+[
+  {
+    "code": "CITS1003",
+    "name": "Introduction to Cybersecurity",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 9,  "duration": 2 },
+      { "type": "LAB", "day": 2, "hour": 14, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 3, "hour": 10, "duration": 2 }],
+      [{ "type": "LAB", "day": 4, "hour": 14, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "CITS1401",
+    "name": "Computational Thinking with Python",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 10, "duration": 2 },
+      { "type": "LAB", "day": 3, "hour": 14, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 2, "hour": 12, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "CITS2200",
+    "name": "Data Structures and Algorithms",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 13, "duration": 2 },
+      { "type": "LAB", "day": 4, "hour": 10, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 0, "hour": 15, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "CITS3007",
+    "name": "System Programming",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 14, "duration": 2 },
+      { "type": "LAB", "day": 3, "hour": 11, "duration": 2 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "CITS3200",
+    "name": "Professional Computing",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 16, "duration": 2 },
+      { "type": "LAB", "day": 0, "hour": 13, "duration": 2 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "CITS4009",
+    "name": "Introduction to Data Science",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 13, "duration": 2 },
+      { "type": "LAB", "day": 1, "hour": 9,  "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 4, "hour": 15, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "MATH1001",
+    "name": "Mathematical Methods 1",
+    "cp": 6,
+    "faculty": "Mathematics",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 11, "duration": 1 },
+      { "type": "TUT", "day": 2, "hour": 9,  "duration": 1 },
+      { "type": "LEC", "day": 4, "hour": 11, "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "MATH2221",
+    "name": "Advanced Calculus",
+    "cp": 6,
+    "faculty": "Mathematics",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 10, "duration": 2 },
+      { "type": "TUT", "day": 3, "hour": 13, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 4, "hour": 10, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "STAT1400",
+    "name": "Statistics for Science",
+    "cp": 6,
+    "faculty": "Mathematics",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 10, "duration": 2 },
+      { "type": "TUT", "day": 4, "hour": 13, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 1, "hour": 15, "duration": 1 }],
+      [{ "type": "TUT", "day": 3, "hour": 9,  "duration": 1 }]
+    ]
+  },
+  {
+    "code": "PHYS1001",
+    "name": "Physics for Scientists",
+    "cp": 6,
+    "faculty": "Physics",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 10, "duration": 1 },
+      { "type": "LEC", "day": 4, "hour": 10, "duration": 1 },
+      { "type": "LAB", "day": 2, "hour": 15, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 1, "hour": 11, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "ENGL1101",
+    "name": "Reading and Writing Practices",
+    "cp": 6,
+    "faculty": "Arts",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 3, "hour": 10, "duration": 1 },
+      { "type": "TUT", "day": 4, "hour": 9,  "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "LAWS1101",
+    "name": "Law and Society",
+    "cp": 6,
+    "faculty": "Law",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 9,  "duration": 2 },
+      { "type": "TUT", "day": 3, "hour": 15, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 4, "hour": 11, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "PSYC1101",
+    "name": "Psychology: Mind and Brain",
+    "cp": 6,
+    "faculty": "Psychology",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 13, "duration": 2 },
+      { "type": "TUT", "day": 2, "hour": 11, "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "BUSN1001",
+    "name": "Business and Management",
+    "cp": 6,
+    "faculty": "Business",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 9,  "duration": 2 },
+      { "type": "TUT", "day": 4, "hour": 14, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 1, "hour": 16, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "CHEM1001",
+    "name": "Chemistry: An Introduction",
+    "cp": 6,
+    "faculty": "Chemistry",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 11, "duration": 2 },
+      { "type": "LAB", "day": 3, "hour": 13, "duration": 3 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 4, "hour": 13, "duration": 3 }]
+    ]
+  }
+]
