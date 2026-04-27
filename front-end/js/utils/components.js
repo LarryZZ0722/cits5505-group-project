@@ -33,11 +33,10 @@ nav.innerHTML = `
   <!-- Center: Nav links (hidden below 768px) -->
   <div class="hidden md:flex gap-1 items-center">
     <a class="nav-link" href="courses.html">Browse Units</a>
-    <a class="nav-link" href="selected.html">
-      My Selection
+    <a class="nav-link" href="schedule.html">
+      My Schedule
       <span class="min-w-[16px] h-4 rounded-xl px-1 bg-[var(--accent)] text-white font-mono text-[9px] inline-flex items-center justify-center" data-badge="sel" style="display:none">0</span>
     </a>
-    <a class="nav-link" href="schedule.html">Schedule</a>
     <a class="nav-link" href="friends.html">
       Friends
       <span class="min-w-[16px] h-4 rounded-xl px-1 bg-[var(--accent)] text-white font-mono text-[9px] inline-flex items-center justify-center" data-badge="req" style="display:none">0</span>
@@ -74,16 +73,16 @@ sidebar.innerHTML = `
     <a class="sidebar-link" href="courses.html">
       <span>Browse Units</span>
     </a>
-    <a class="sidebar-link" href="selected.html">
-      <span>My Selection</span>
-      <span class="min-w-[16px] h-4 rounded-xl px-1 bg-[var(--accent)] text-white font-mono text-[9px] inline-flex items-center justify-center" data-badge="sel" style="display:none">0</span>
-    </a>
     <a class="sidebar-link" href="schedule.html">
-      <span>Schedule</span>
+      <span>My Schedule</span>
+      <span class="min-w-[16px] h-4 rounded-xl px-1 bg-[var(--accent)] text-white font-mono text-[9px] inline-flex items-center justify-center" data-badge="sel" style="display:none">0</span>
     </a>
     <a class="sidebar-link" href="friends.html">
       <span>Friends</span>
       <span class="min-w-[16px] h-4 rounded-xl px-1 bg-[var(--accent)] text-white font-mono text-[9px] inline-flex items-center justify-center" data-badge="req" style="display:none">0</span>
+    </a>
+    <a class="sidebar-link" href="profile.html">
+      <span>Profile</span>
     </a>
   </nav>
 

@@ -20,11 +20,11 @@ function renderNavUser() {
   const user = State.getUser();
   if (user) {
     right.innerHTML = `
-      <div class="flex items-center gap-2 text-[13px] text-[var(--text2)]">
+      <a href="profile.html" class="hidden md:flex items-center gap-2 text-[13px] text-[var(--text2)] hover:text-[var(--text)] transition-colors cursor-pointer no-underline">
         <div class="w-[30px] h-[30px] rounded-full bg-[var(--accent-glow)] border border-[var(--accent-line)] flex items-center justify-center font-mono text-[11px] text-[var(--accent)] font-medium">${user.initials}</div>
         <span class="hidden sm:inline">${user.name}</span>
-      </div>
-      <a href="index.html" class="btn btn-ghost btn-sm" id="logoutBtn">Log out</a>`;
+      </a>
+      <a href="index.html" class="btn btn-ghost btn-sm hidden md:inline-flex" id="logoutBtn">Log out</a>`;
 
     document.getElementById('logoutBtn')?.addEventListener('click', e => {
       e.preventDefault();

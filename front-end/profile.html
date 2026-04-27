@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile — UWA Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,300;0,400;0,500;1,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        fontFamily: {
+          sans:    ['"Instrument Sans"', 'sans-serif'],
+          display: ['Syne', 'sans-serif'],
+          mono:    ['"JetBrains Mono"', 'monospace'],
+        },
+      },
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+<body>
+
+  <!-- Nav injected by js/utils/components.js -->
+
+  <div class="max-w-[680px] mx-auto px-6 pt-[90px] pb-16 page-enter">
+
+    <!-- ── Page header ── -->
+    <div class="mb-8">
+      <h1 class="font-display text-[28px] font-extrabold text-[var(--text)] mb-1">Profile</h1>
+      <p class="text-[14px] text-[var(--text2)]">Manage your account details and password.</p>
+    </div>
+
+    <!-- ── Avatar + name banner ── -->
+    <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-[var(--r-xl)] p-6 mb-5 flex items-center gap-5">
+      <div id="profileAvatar"
+           class="w-16 h-16 rounded-full bg-[var(--accent-glow)] border-2 border-[var(--accent-line)] flex items-center justify-center font-mono text-[22px] font-medium text-[var(--accent)] flex-shrink-0">
+        ?
+      </div>
+      <div>
+        <div id="profileName" class="font-display text-[20px] font-bold text-[var(--text)]">—</div>
+        <div id="profileEmail" class="text-[13px] text-[var(--text3)] mt-0.5">—</div>
+      </div>
+    </div>
+
+    <!-- ── Personal Information ── -->
+    <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-[var(--r-xl)] overflow-hidden mb-5">
+      <div class="px-6 py-4 border-b border-[var(--border)]">
+        <div class="font-display text-[15px] font-bold text-[var(--text)]">Personal Information</div>
+        <div class="text-[12px] text-[var(--text3)] mt-0.5">Update your display name and student number.</div>
+      </div>
+
+      <div class="p-6 flex flex-col gap-4">
+        <!-- Name -->
+        <div>
+          <label class="block font-mono text-[11px] text-[var(--text3)] uppercase tracking-widest mb-1.5" for="profileNameInput">
+            Display Name
+          </label>
+          <input
+            id="profileNameInput"
+            type="text"
+            placeholder="Your name"
+            class="w-full py-[10px] px-3 bg-[var(--bg3)] border border-[var(--border)] rounded text-[var(--text)] text-[13px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)]">
+        </div>
+
+        <!-- Student Number -->
+        <div>
+          <label class="block font-mono text-[11px] text-[var(--text3)] uppercase tracking-widest mb-1.5" for="profileStuInput">
+            Student Number
+          </label>
+          <input
+            id="profileStuInput"
+            type="text"
+            placeholder="21xxxxxx"
+            maxlength="8"
+            class="w-full py-[10px] px-3 bg-[var(--bg3)] border border-[var(--border)] rounded text-[var(--text)] text-[13px] font-mono outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)]">
+          <p id="profileStuErr" class="hidden text-[11px] text-[var(--red)] mt-1">Must be an 8-digit number starting with 2.</p>
+        </div>
+
+        <div class="flex justify-end pt-1">
+          <button id="saveProfileBtn" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Change Password ── -->
+    <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-[var(--r-xl)] overflow-hidden">
+      <div class="px-6 py-4 border-b border-[var(--border)]">
+        <div class="font-display text-[15px] font-bold text-[var(--text)]">Change Password</div>
+        <div class="text-[12px] text-[var(--text3)] mt-0.5">Use at least 8 characters for your new password.</div>
+      </div>
+
+      <div class="p-6 flex flex-col gap-4">
+        <!-- Current password -->
+        <div>
+          <label class="block font-mono text-[11px] text-[var(--text3)] uppercase tracking-widest mb-1.5" for="currentPass">
+            Current Password
+          </label>
+          <div class="relative">
+            <input id="currentPass" type="password" placeholder="Enter current password"
+              class="w-full py-[10px] px-3 pr-10 bg-[var(--bg3)] border border-[var(--border)] rounded text-[var(--text)] text-[13px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)]">
+            <button type="button" class="input-eye" data-target="currentPass">👁</button>
+          </div>
+        </div>
+
+        <!-- New password -->
+        <div>
+          <label class="block font-mono text-[11px] text-[var(--text3)] uppercase tracking-widest mb-1.5" for="newPass">
+            New Password
+          </label>
+          <div class="relative">
+            <input id="newPass" type="password" placeholder="Enter new password"
+              class="w-full py-[10px] px-3 pr-10 bg-[var(--bg3)] border border-[var(--border)] rounded text-[var(--text)] text-[13px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)]">
+            <button type="button" class="input-eye" data-target="newPass">👁</button>
+          </div>
+          <!-- Strength bar -->
+          <div class="mt-2 h-[3px] rounded-full bg-[var(--border)] overflow-hidden">
+            <div class="strength-fill" id="strengthFill"></div>
+          </div>
+          <div class="flex justify-between items-center mt-1">
+            <span id="strengthLabel" class="text-[11px] text-[var(--text3)]"></span>
+          </div>
+        </div>
+
+        <!-- Confirm new password -->
+        <div>
+          <label class="block font-mono text-[11px] text-[var(--text3)] uppercase tracking-widest mb-1.5" for="confirmPass">
+            Confirm New Password
+          </label>
+          <div class="relative">
+            <input id="confirmPass" type="password" placeholder="Repeat new password"
+              class="w-full py-[10px] px-3 pr-10 bg-[var(--bg3)] border border-[var(--border)] rounded text-[var(--text)] text-[13px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)]">
+            <button type="button" class="input-eye" data-target="confirmPass">👁</button>
+          </div>
+          <p id="confirmErr" class="hidden text-[11px] text-[var(--red)] mt-1">Passwords do not match.</p>
+        </div>
+
+        <div class="flex justify-end pt-1">
+          <button id="changePassBtn" class="btn btn-primary">Update password</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module" src="js/profile.js"></script>
+</body>
+</html>

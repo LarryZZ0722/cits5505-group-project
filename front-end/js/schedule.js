@@ -1,11 +1,13 @@
 /* ═══════════════════════════════════════════
-   schedule.js — Schedule Generator page
+   schedule.js — My Schedule page
+   (merged from selected.js + schedule.js)
 ═══════════════════════════════════════════ */
 
 import State from './utils/state.js';
 import API from './utils/api.js';
 import toast from './utils/toast.js';
-import { DAYS, getColor, getActiveSessions, detectConflicts } from './utils/schedule-utils.js';
+import { DAYS, getColor, getActiveSessions, detectConflicts, getTotalCp, getDaysUsed } from './utils/schedule-utils.js';
+import { updateNavBadge } from './utils/nav.js';
 import './utils/components.js';
 
 const SLOT_H  = 52;
@@ -30,29 +32,58 @@ document.addEventListener('DOMContentLoaded', async () => {
     toast('Could not load data', 'error');
   }
 
-  renderSchedulePage();
+  updateNavBadge(selected.length);
+  renderAll();
   bindControls();
   bindPublicToggle();
 });
 
-/* ── Full page render ────────────────────── */
-function renderSchedulePage() {
+/* ── Render everything ───────────────────── */
+function renderAll() {
+  const conflicts = detectConflicts(selected, allCourses);
+  renderSummaryBar(conflicts);
+  renderConflictAlert(conflicts);
   renderLegend();
   renderVariantButtons();
-  renderGrid();
+  renderTimetable(conflicts);
+  renderUnitCards(conflicts);
 }
 
-/* ── Control panel bindings ──────────────── */
-function bindControls() {
-  ['prefNo8', 'prefCompact', 'prefFri'].forEach(id => {
-    document.getElementById(id)?.addEventListener('change', renderSchedulePage);
-  });
+/* ── Summary stats bar ───────────────────── */
+function renderSummaryBar(conflicts) {
+  const el = document.getElementById('summaryBar');
+  if (!el) return;
+  if (!selected.length) { el.style.display = 'none'; return; }
+  el.style.display = '';
 
-  document.getElementById('startRange')?.addEventListener('input', function () {
-    document.getElementById('startVal').textContent = this.value + ':00';
-  });
+  const cp   = getTotalCp(selected, allCourses);
+  const days = getDaysUsed(selected, allCourses);
 
-  document.getElementById('autoBtn')?.addEventListener('click', autoSchedule);
+  el.innerHTML = `
+    <div class="text-center px-4 py-5">
+      <div class="text-[28px] font-display font-extrabold tracking-tight text-[var(--text)]">${selected.length}</div>
+      <div class="text-[11px] text-[var(--text3)] uppercase tracking-widest font-mono mt-1">Units</div>
+    </div>
+    <div class="text-center px-4 py-5">
+      <div class="text-[28px] font-display font-extrabold tracking-tight text-[var(--text)]">${cp}</div>
+      <div class="text-[11px] text-[var(--text3)] uppercase tracking-widest font-mono mt-1">Credit points</div>
+    </div>
+    <div class="text-center px-4 py-5">
+      <div class="text-[28px] font-display font-extrabold tracking-tight text-[var(--text)]">${days}</div>
+      <div class="text-[11px] text-[var(--text3)] uppercase tracking-widest font-mono mt-1">Days on campus</div>
+    </div>
+    <div class="text-center px-4 py-5">
+      <div class="text-[28px] font-display font-extrabold tracking-tight" style="color:${conflicts.size ? 'var(--red)' : 'var(--green)'}">
+        ${conflicts.size ? '⚠' : '✓'}
+      </div>
+      <div class="text-[11px] text-[var(--text3)] uppercase tracking-widest font-mono mt-1">${conflicts.size ? 'Clashes' : 'No conflicts'}</div>
+    </div>`;
+}
+
+/* ── Conflict alert ──────────────────────── */
+function renderConflictAlert(conflicts) {
+  const el = document.getElementById('conflictAlert');
+  if (el) el.style.display = conflicts.size ? 'flex' : 'none';
 }
 
 /* ── Unit legend ─────────────────────────── */
@@ -101,30 +132,10 @@ function renderVariantButtons() {
   });
 }
 
-/* ── Status bar ──────────────────────────── */
-function renderStatusBar(conflicts) {
-  const bar  = document.getElementById('statusBar');
-  const text = document.getElementById('statusText');
-  if (!bar || !text) return;
-
-  if (!selected.length) { bar.className = 'status-bar'; return; }
-
-  if (conflicts.size) {
-    bar.className    = 'status-bar conflict';
-    text.textContent = `${conflicts.size} unit${conflicts.size > 1 ? 's' : ''} in conflict — try auto-schedule`;
-  } else {
-    bar.className    = 'status-bar clear';
-    text.textContent = 'No conflicts — looking good!';
-  }
-}
-
 /* ── Timetable grid ──────────────────────── */
-function renderGrid() {
+function renderTimetable(conflicts) {
   const body = document.getElementById('ttBody');
   if (!body) return;
-
-  const conflicts = detectConflicts(selected, allCourses);
-  renderStatusBar(conflicts);
 
   let html = '';
   for (let r = 0; r < TOTAL_H; r++) {
@@ -168,7 +179,97 @@ function renderGrid() {
   });
 }
 
-/* ── Alternative slot drawer ─────────────── */
+/* ── Unit cards ──────────────────────────── */
+const SESSION_TYPE_CLS = {
+  lec: 'bg-blue-500/10 border-blue-500/30 text-blue-400',
+  lab: 'bg-purple-500/10 border-purple-500/30 text-purple-400',
+  tut: 'bg-green-500/10 border-green-500/30 text-green-400',
+};
+
+function renderUnitCards(conflicts) {
+  const grid  = document.getElementById('unitsGrid');
+  const empty = document.getElementById('emptyState');
+  if (!grid) return;
+
+  if (!selected.length) {
+    grid.style.display          = 'none';
+    if (empty) empty.style.display = 'flex';
+    return;
+  }
+  grid.style.display          = '';
+  if (empty) empty.style.display = 'none';
+
+  grid.innerHTML = selected.map(({ code, altIdx }, i) => {
+    const course     = allCourses.find(c => c.code === code);
+    const col        = getColor(i);
+    const isConflict = conflicts.has(code);
+    return course
+      ? buildUnitCard(course, altIdx, col, isConflict)
+      : buildUnknownCard(code, col);
+  }).join('');
+
+  grid.querySelectorAll('.remove-unit-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      selected = selected.filter(x => x.code !== btn.dataset.code);
+      await API.saveTimetable({ selected });
+      updateNavBadge(selected.length);
+      toast(`${btn.dataset.code} removed`);
+      renderAll();
+    });
+  });
+}
+
+function buildUnitCard(course, altIdx, col, isConflict) {
+  const sessions    = getActiveSessions(course, altIdx);
+  const sessionHTML = sessions.map(s => {
+    const typeCls = SESSION_TYPE_CLS[s.type.toLowerCase()] || 'border-[var(--border2)] text-[var(--text2)] bg-[var(--bg3)]';
+    const hasAlts = course.alternatives?.length && s.type !== 'LEC';
+    return `<div class="flex items-center gap-2 text-[12px]">
+      <span class="font-mono text-[10px] font-medium px-[7px] py-[2px] rounded-md border ${typeCls}">${s.type}</span>
+      <span class="text-[var(--text2)]">${DAYS[s.day]} ${s.hour}:00 – ${s.hour + s.duration}:00</span>
+      ${hasAlts ? `<button class="ml-auto text-[var(--accent)] text-[11px] font-mono hover:underline bg-transparent border-0 cursor-pointer swap-btn" data-code="${course.code}">swap →</button>` : ''}
+    </div>`;
+  }).join('');
+
+  const tagCls  = 'inline-flex items-center px-[7px] py-[2px] rounded-md text-[10px] font-mono border border-[var(--border2)] bg-[var(--bg3)] text-[var(--text2)]';
+  const tagHTML = [
+    `<span class="${tagCls}">${course.cp} cp</span>`,
+    ...course.sems.map(s => `<span class="${tagCls}">${s}</span>`),
+    `<span class="${tagCls}">${course.faculty}</span>`,
+    isConflict ? `<span class="inline-flex items-center px-[7px] py-[2px] rounded-md text-[10px] font-mono border border-[rgba(247,111,111,.35)] bg-[var(--red-bg)] text-[var(--red)]">Conflict</span>` : '',
+  ].join('');
+
+  const cardBorder = isConflict ? 'border-[var(--red)]' : 'border-[var(--border)] hover:border-[var(--border2)]';
+  return `<div class="bg-[var(--bg2)] border ${cardBorder} rounded-[var(--r-xl)] overflow-hidden transition-[border-color,transform] hover:-translate-y-0.5">
+    <div class="flex items-start gap-3 p-4">
+      <div class="w-[3px] self-stretch rounded-full flex-shrink-0" style="background:${col.border}"></div>
+      <div class="flex-1 min-w-0">
+        <div class="font-mono text-[11px] font-medium text-[var(--text3)] uppercase tracking-wider">${course.code}</div>
+        <div class="font-display text-[15px] font-semibold text-[var(--text)] leading-tight mt-0.5">${course.name}</div>
+      </div>
+      <button class="btn btn-sm btn-danger remove-unit-btn flex-shrink-0" data-code="${course.code}">Remove</button>
+    </div>
+    <div class="px-4 pb-4 flex flex-col gap-3">
+      <div class="flex flex-col gap-1.5">${sessionHTML}</div>
+      <div class="flex flex-wrap gap-1.5">${tagHTML}</div>
+    </div>
+  </div>`;
+}
+
+function buildUnknownCard(code, col) {
+  return `<div class="bg-[var(--bg2)] border border-[var(--border)] rounded-[var(--r-xl)] overflow-hidden">
+    <div class="flex items-start gap-3 p-4">
+      <div class="w-[3px] self-stretch rounded-full flex-shrink-0" style="background:${col.border}"></div>
+      <div class="flex-1 min-w-0">
+        <div class="font-mono text-[11px] font-medium text-[var(--text3)] uppercase tracking-wider">${code}</div>
+        <div class="font-display text-[15px] font-semibold leading-tight mt-0.5" style="color:var(--text2)">Custom / unknown unit</div>
+      </div>
+      <button class="btn btn-sm btn-danger remove-unit-btn flex-shrink-0" data-code="${code}">Remove</button>
+    </div>
+  </div>`;
+}
+
+/* ── Alt drawer ──────────────────────────── */
 function showAltDrawer(code) {
   const course = allCourses.find(c => c.code === code);
   if (!course) return;
@@ -176,8 +277,7 @@ function showAltDrawer(code) {
 
   const entry = selected.find(s => s.code === code);
   const alts  = course.alternatives || [];
-
-  const opts = [
+  const opts  = [
     { label: 'Default (original)', idx: 0 },
     ...alts.map((a, i) => ({
       label: `Option ${i + 1}: ${a.map(s => DAYS[s.day].slice(0, 3) + ' ' + s.hour + ':00 ' + s.type).join(', ')}`,
@@ -195,9 +295,7 @@ function showAltDrawer(code) {
       </div>
       <div class="alt-chips">
         ${opts.map(o =>
-          `<div class="alt-chip ${entry?.altIdx === o.idx ? 'chosen' : ''}" data-idx="${o.idx}">
-            ${o.label}
-          </div>`
+          `<div class="alt-chip ${entry?.altIdx === o.idx ? 'chosen' : ''}" data-idx="${o.idx}">${o.label}</div>`
         ).join('')}
       </div>
     </div>`;
@@ -207,7 +305,7 @@ function showAltDrawer(code) {
       const idx = parseInt(chip.dataset.idx);
       selected  = selected.map(s => s.code === code ? { ...s, altIdx: idx } : s);
       await API.saveTimetable({ selected });
-      renderSchedulePage();
+      renderAll();
       drawer.querySelectorAll('.alt-chip').forEach(c => c.classList.remove('chosen'));
       chip.classList.add('chosen');
     });
@@ -219,7 +317,26 @@ function showAltDrawer(code) {
   });
 }
 
-/* ── Public / share-with-friends toggle ──── */
+/* ── Controls ────────────────────────────── */
+function bindControls() {
+  ['prefNo8', 'prefCompact', 'prefFri'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', renderAll);
+  });
+
+  document.getElementById('startRange')?.addEventListener('input', function () {
+    document.getElementById('startVal').textContent = this.value + ':00';
+  });
+
+  document.getElementById('autoBtn')?.addEventListener('click', autoSchedule);
+
+  // Swap buttons inside unit cards (delegated — re-binds on each render via renderAll)
+  document.getElementById('unitsGrid')?.addEventListener('click', e => {
+    const btn = e.target.closest('.swap-btn');
+    if (btn) showAltDrawer(btn.dataset.code);
+  });
+}
+
+/* ── Public toggle ───────────────────────── */
 function bindPublicToggle() {
   const toggle  = document.getElementById('publicToggle');
   const nameIn  = document.getElementById('timetableNameInput');
@@ -270,9 +387,9 @@ async function autoSchedule() {
     const result = await API.autoSchedule({ selected, preferences });
     selected     = result.selected;
     await API.saveTimetable({ selected });
-    renderSchedulePage();
     const drawer = document.getElementById('altDrawer');
     if (drawer) drawer.style.display = 'none';
+    renderAll();
     toast('Schedule optimised!', 'success');
   } catch {
     toast('Auto-schedule failed', 'error');

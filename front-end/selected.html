@@ -2,79 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Selection — UWA Planner</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,300;0,400;0,500;1,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <script>
-    tailwind.config = {
-      theme: {
-        fontFamily: {
-          sans:    ['"Instrument Sans"', 'sans-serif'],
-          display: ['Syne', 'sans-serif'],
-          mono:    ['"JetBrains Mono"', 'monospace'],
-        },
-      },
-    }
-  </script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="css/tokens.css">
-  <link rel="stylesheet" href="css/custom.css">
+  <meta http-equiv="refresh" content="0;url=schedule.html">
+  <title>Redirecting…</title>
 </head>
 <body>
-
-  <!-- Nav injected by js/utils/components.js -->
-
-  <!-- ── Page shell ── -->
-  <div class="max-w-[1160px] mx-auto px-6 pt-[90px] pb-10 page-enter">
-
-    <!-- Header row -->
-    <div class="flex items-start justify-between flex-wrap gap-3 mb-7">
-      <div>
-        <h1 class="font-display text-[28px] font-extrabold text-[var(--text)] mb-1">My Selection</h1>
-        <p class="text-[14px] text-[var(--text2)]">Review and manage your chosen units for the semester.</p>
-      </div>
-      <div class="flex gap-2 flex-shrink-0">
-        <a class="btn" href="courses.html">+ Add more</a>
-        <a class="btn btn-primary" href="schedule.html">Generate schedule →</a>
-      </div>
-    </div>
-
-    <!-- Summary bar — children (.summary-stat) rendered by JS -->
-    <div
-      class="grid bg-[var(--bg2)] border border-[var(--border)] rounded-xl overflow-hidden mb-6"
-      style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));display:none"
-      id="summaryBar">
-    </div>
-
-    <!-- Conflict alert — animation class in custom.css -->
-    <div
-      class="conflict-alert flex items-center gap-3 bg-[var(--red-bg)] border border-[rgba(247,111,111,0.3)] rounded-lg px-[18px] py-[14px] mb-5"
-      id="conflictAlert"
-      style="display:none">
-      <span class="text-[20px] flex-shrink-0">⚠️</span>
-      <div class="text-[13px] text-[var(--red)]">
-        <strong class="font-semibold">Time conflicts detected.</strong>
-        Go to the Schedule page to resolve them using alternative slots.
-      </div>
-      <a class="btn btn-sm ml-auto flex-shrink-0" href="schedule.html">Fix now</a>
-    </div>
-
-    <!-- Cards grid — cards rendered by JS (.unit-card etc. in custom.css) -->
-    <div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4" id="unitsGrid"></div>
-
-    <!-- Empty state -->
-    <div class="text-center py-16 flex-col items-center gap-3" id="emptyState" style="display:none">
-      <div class="text-[40px] opacity-30">📭</div>
-      <div class="font-display text-[18px] font-bold text-[var(--text2)] mt-3">No units selected yet</div>
-      <div class="text-[13px] text-[var(--text3)] max-w-[300px] mx-auto mt-1">
-        Head to Browse Units to start building your semester plan.
-      </div>
-      <a class="btn btn-primary mt-2" href="courses.html">Browse units →</a>
-    </div>
-
-  </div>
-
-  <script type="module" src="js/selected.js"></script>
+  <script>window.location.replace('schedule.html');</script>
 </body>
 </html>

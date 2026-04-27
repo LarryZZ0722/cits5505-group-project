@@ -2,9 +2,9 @@
    courses.js — Course Input / Browse page
 ═══════════════════════════════════════════ */
 
-import API from './utils/api.js';
+import API from './utils/mockapi.js';
 import toast from './utils/toast.js';
-import { DAYS, getColor, getTotalCp } from './utils/schedule-utils.js';
+import { DAYS, getColor } from './utils/schedule-utils.js';
 import { updateNavBadge } from './utils/nav.js';
 import './utils/components.js';
 
@@ -182,16 +182,6 @@ function renderBasket() {
   }
 
   if (footer) footer.style.display = '';
-
-  const cp  = getTotalCp(selected, allCourses);
-  const pct = Math.min(100, Math.round((cp / 24) * 100));
-
-  document.getElementById('cpLabel').textContent   = `${cp} / 24 cp`;
-  document.getElementById('cpPercent').textContent = `${pct}%`;
-
-  const fill = document.getElementById('cpFill');
-  fill.style.width      = pct + '%';
-  fill.style.background = cp > 24 ? 'var(--red)' : cp >= 18 ? 'var(--green)' : 'var(--accent)';
 
   body.innerHTML = `<div class="flex flex-col gap-2">${
     selected.map(({ code }, i) => {
