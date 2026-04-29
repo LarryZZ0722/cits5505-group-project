@@ -1,0 +1,358 @@
+{
+  "$schema": "UWA Timetable Planner — Data Model",
+  "$version": "1.0.0",
+  "$description": "All data shapes used between the frontend and Flask backend. Every API response must match these schemas.",
+
+  "schemas": {
+
+    "Session": {
+      "$description": "A single weekly class occurrence (lecture, lab, or tutorial).",
+      "$example": { "type": "LAB", "day": 2, "hour": 14, "duration": 2 },
+      "fields": {
+        "type": {
+          "type": "string",
+          "enum": ["LEC", "LAB", "TUT"],
+          "description": "LEC = Lecture, LAB = Laboratory, TUT = Tutorial"
+        },
+        "day": {
+          "type": "integer",
+          "enum": [0, 1, 2, 3, 4],
+          "description": "Day of week. 0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 4 = Friday"
+        },
+        "hour": {
+          "type": "integer",
+          "minimum": 8,
+          "maximum": 19,
+          "description": "Start time in 24-hour format. e.g. 9 = 09:00, 14 = 14:00"
+        },
+        "duration": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4,
+          "description": "Length in hours. e.g. 2 means the class runs from hour to hour+2"
+        }
+      }
+    },
+
+    "Course": {
+      "$description": "A UWA unit with all its scheduled sessions and available alternatives. This is the primary data object returned by GET /api/courses.",
+      "$example": {
+        "code": "CITS1003",
+        "name": "Introduction to Cybersecurity",
+        "cp": 6,
+        "faculty": "CSSE",
+        "sems": ["S1"],
+        "sessions": [
+          { "type": "LEC", "day": 0, "hour": 9,  "duration": 2 },
+          { "type": "LAB", "day": 2, "hour": 14, "duration": 2 }
+        ],
+        "alternatives": [
+          [{ "type": "LAB", "day": 3, "hour": 10, "duration": 2 }],
+          [{ "type": "LAB", "day": 4, "hour": 14, "duration": 2 }]
+        ]
+      },
+      "fields": {
+        "code": {
+          "type": "string",
+          "description": "Unique unit code. Always uppercase. e.g. 'CITS1003', 'MATH1001'",
+          "example": "CITS1003"
+        },
+        "name": {
+          "type": "string",
+          "description": "Full unit name as listed in UWA handbook.",
+          "example": "Introduction to Cybersecurity"
+        },
+        "cp": {
+          "type": "integer",
+          "description": "Credit point value. UWA units are typically 6 cp.",
+          "example": 6
+        },
+        "faculty": {
+          "type": "string",
+          "description": "School or faculty offering the unit.",
+          "example": "CSSE"
+        },
+        "sems": {
+          "type": "array",
+          "items": { "enum": ["S1", "S2", "SUM"] },
+          "description": "Semesters in which the unit is offered. S1 = Semester 1, S2 = Semester 2, SUM = Summer school.",
+          "example": ["S1", "S2"]
+        },
+        "sessions": {
+          "type": "array",
+          "items": { "$ref": "Session" },
+          "description": "Default set of weekly sessions. Must include all types (LEC, LAB, TUT) the unit offers."
+        },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "$ref": "Session" }
+          },
+          "description": "Alternative time slot groups for swappable session types (usually LAB or TUT). Each inner array is one full alternative group. The frontend picks one group by index (altIdx). If empty, no alternatives are available."
+        }
+      },
+      "$notes": {
+        "how_alternatives_work": "Each group in 'alternatives' replaces sessions of the same 'type' in the base 'sessions' array. For example, if sessions has a LAB and alternatives[0] is [LAB Thu 10:00], then choosing altIdx=1 replaces the LAB with the Thursday one, keeping all LECs unchanged.",
+        "altIdx_mapping": {
+          "0": "Use base sessions as-is (default)",
+          "1": "Replace matching types with alternatives[0]",
+          "2": "Replace matching types with alternatives[1]",
+          "N": "Replace matching types with alternatives[N-1]"
+        }
+      }
+    },
+
+    "User": {
+      "$description": "Authenticated user profile. Returned by login and register endpoints. Stored in frontend localStorage.",
+      "$example": {
+        "id": 1,
+        "name": "Alex Smith",
+        "initials": "A",
+        "email": "21234567@student.uwa.edu.au",
+        "studentNumber": "21234567"
+      },
+      "fields": {
+        "id": {
+          "type": "integer",
+          "description": "Database primary key."
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name (first name or full name).",
+          "example": "Alex Smith"
+        },
+        "initials": {
+          "type": "string",
+          "description": "Single uppercase letter used in the nav avatar. Derived from name[0].",
+          "example": "A"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Must be a @student.uwa.edu.au address.",
+          "example": "21234567@student.uwa.edu.au"
+        },
+        "studentNumber": {
+          "type": "string",
+          "pattern": "^2\\d{7}$",
+          "description": "8-digit UWA student number starting with 2.",
+          "example": "21234567"
+        }
+      }
+    },
+
+    "SelectedEntry": {
+      "$description": "A single unit in a user's selection, including which alternative slot they've chosen.",
+      "$example": { "code": "CITS1003", "altIdx": 1 },
+      "fields": {
+        "code": {
+          "type": "string",
+          "description": "Unit code. Must match a Course.code.",
+          "example": "CITS1003"
+        },
+        "altIdx": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Which slot group to use. 0 = default sessions. 1+ = alternatives[altIdx-1].",
+          "example": 1
+        }
+      }
+    },
+
+    "Timetable": {
+      "$description": "A saved timetable belonging to a user. Stored in the Flask database. Can be shared via a short code.",
+      "$example": {
+        "id": 42,
+        "userId": 1,
+        "name": "My Semester 1 Plan",
+        "semester": "S1",
+        "selected": [
+          { "code": "CITS1003", "altIdx": 1 },
+          { "code": "MATH1001", "altIdx": 0 },
+          { "code": "STAT1400", "altIdx": 2 }
+        ],
+        "shareCode": "x8k2mq",
+        "createdAt": "2025-02-14T10:30:00Z",
+        "updatedAt": "2025-02-15T08:00:00Z"
+      },
+      "fields": {
+        "id": {
+          "type": "integer",
+          "description": "Database primary key."
+        },
+        "userId": {
+          "type": "integer",
+          "description": "Foreign key to User.id."
+        },
+        "name": {
+          "type": "string",
+          "description": "User-defined label for this timetable.",
+          "example": "My Semester 1 Plan"
+        },
+        "semester": {
+          "type": "string",
+          "enum": ["S1", "S2", "SUM"],
+          "description": "The semester this timetable is for.",
+          "example": "S1"
+        },
+        "selected": {
+          "type": "array",
+          "items": { "$ref": "SelectedEntry" },
+          "description": "Ordered list of unit selections with alt slot choices."
+        },
+        "shareCode": {
+          "type": "string",
+          "description": "Short alphanumeric code used to generate a shareable URL. e.g. https://uwa-planner.app/s/x8k2mq",
+          "example": "x8k2mq"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "ISO 8601",
+          "description": "Creation timestamp in UTC.",
+          "example": "2025-02-14T10:30:00Z"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "ISO 8601",
+          "description": "Last modification timestamp in UTC.",
+          "example": "2025-02-15T08:00:00Z"
+        }
+      }
+    },
+
+    "LocalState": {
+      "$description": "Frontend-only state stored in localStorage under the key 'uwa_planner_state'. Not sent to the server unless the user saves their timetable.",
+      "$key": "uwa_planner_state",
+      "$example": {
+        "selected": [
+          { "code": "CITS1003", "altIdx": 1 },
+          { "code": "MATH1001", "altIdx": 0 }
+        ],
+        "semester": "S1",
+        "user": {
+          "name": "Alex",
+          "initials": "A",
+          "email": "21234567@student.uwa.edu.au"
+        }
+      },
+      "fields": {
+        "selected": {
+          "type": "array",
+          "items": { "$ref": "SelectedEntry" },
+          "description": "Units added to the current session basket."
+        },
+        "semester": {
+          "type": "string",
+          "enum": ["S1", "S2", "SUM"],
+          "description": "Currently active semester filter."
+        },
+        "user": {
+          "type": "object | null",
+          "description": "Logged-in user info. null when not authenticated."
+        }
+      }
+    }
+  },
+
+  "api_endpoints": {
+    "$description": "Summary of all Flask API endpoints the frontend will call.",
+    "endpoints": [
+      {
+        "method": "GET",
+        "path": "/api/courses",
+        "description": "List all courses. Supports query params: semester, faculty, q (search).",
+        "response": "Course[]"
+      },
+      {
+        "method": "GET",
+        "path": "/api/courses/<code>",
+        "description": "Get a single course by unit code.",
+        "response": "Course"
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/login",
+        "description": "Authenticate with email and password.",
+        "body": { "email": "string", "password": "string" },
+        "response": { "user": "User" }
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/register",
+        "description": "Create a new student account.",
+        "body": {
+          "firstName": "string",
+          "lastName": "string",
+          "studentNumber": "string",
+          "email": "string",
+          "password": "string"
+        },
+        "response": { "user": "User" }
+      },
+      {
+        "method": "GET",
+        "path": "/api/timetables",
+        "description": "Get all timetables for the authenticated user.",
+        "response": "Timetable[]"
+      },
+      {
+        "method": "POST",
+        "path": "/api/timetables",
+        "description": "Save a new timetable.",
+        "body": {
+          "name": "string",
+          "semester": "S1 | S2 | SUM",
+          "selected": "SelectedEntry[]"
+        },
+        "response": "Timetable"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/timetables/<id>",
+        "description": "Update an existing timetable.",
+        "body": {
+          "name": "string",
+          "semester": "string",
+          "selected": "SelectedEntry[]"
+        },
+        "response": "Timetable"
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/timetables/<id>",
+        "description": "Delete a saved timetable.",
+        "response": { "deleted": true }
+      },
+      {
+        "method": "GET",
+        "path": "/api/timetables/share/<shareCode>",
+        "description": "Load a timetable by its public share code (no auth required).",
+        "response": "Timetable"
+      }
+    ]
+  },
+
+  "day_reference": {
+    "$description": "Integer to day name mapping used throughout the codebase.",
+    "0": "Monday",
+    "1": "Tuesday",
+    "2": "Wednesday",
+    "3": "Thursday",
+    "4": "Friday"
+  },
+
+  "semester_reference": {
+    "$description": "Semester codes used in Course.sems, Timetable.semester, and filter chips.",
+    "S1":  "Semester 1 (February – June)",
+    "S2":  "Semester 2 (July – November)",
+    "SUM": "Summer School (November – February)"
+  },
+
+  "session_type_reference": {
+    "$description": "Session type codes and their display colours in the frontend.",
+    "LEC": { "label": "Lecture",   "cssClass": "tag-lec", "color": "#4f8ef7" },
+    "LAB": { "label": "Laboratory","cssClass": "tag-lab", "color": "#2dd4a0" },
+    "TUT": { "label": "Tutorial",  "cssClass": "tag-tut", "color": "#f5a623" }
+  }
+}

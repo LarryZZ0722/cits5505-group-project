@@ -1,0 +1,11 @@
+{
+  "name": "uwa-planner-frontend",
+  "private": true,
+  "scripts": {
+    "build": "tailwindcss -i css/tailwind.css -o css/tailwind-built.css --minify",
+    "watch": "tailwindcss -i css/tailwind.css -o css/tailwind-built.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

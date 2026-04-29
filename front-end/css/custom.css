@@ -1,0 +1,197 @@
+/* ═══════════════════════════════════════════
+   custom.css — Only things Tailwind cannot do:
+   keyframes, scrollbar, * transitions,
+   pseudo-elements, sidebar/overlay animations,
+   and JS-toggled state classes.
+═══════════════════════════════════════════ */
+
+/* 1. Body reset */
+body { background:var(--bg); color:var(--text); font-family:var(--sans); font-size:14px; line-height:1.6; }
+a { color:inherit; text-decoration:none; }
+button, input, select, textarea { font-family:var(--sans); }
+
+/* 2. Theme cross-fade (needs * selector) */
+*, *::before, *::after { transition:background-color .25s,border-color .25s,color .2s,box-shadow .25s; }
+.page-enter,.toast,.nav-logo-dot,.class-pill,.hero-orb { transition:none; }
+
+/* 3. Scrollbar */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:4px; }
+.no-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
+.no-scrollbar::-webkit-scrollbar { display:none; }
+
+/* 4. Keyframes */
+@keyframes pageIn    { from { opacity:0; transform:translateY(8px); }  to { opacity:1; transform:translateY(0); } }
+@keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes toastIn   { from { opacity:0; transform:translateX(12px); } to { opacity:1; transform:translateX(0); } }
+@keyframes toastOut  { from { opacity:1; transform:translateX(0); }    to { opacity:0; transform:translateX(12px); } }
+@keyframes breathe   { 0%,100% { opacity:1; transform:scale(1); }  50% { opacity:.4; transform:scale(.75); } }
+@keyframes flashRed  { 0%,100% { opacity:1; }  50% { opacity:.35; } }
+@keyframes drawerIn  { from { opacity:0; transform:translateY(4px); }  to { opacity:1; transform:translateY(0); } }
+
+/* 5. Animation classes */
+.page-enter     { animation:pageIn .25s ease forwards; }
+.conflict-alert { animation:slideDown .25s ease; }
+
+/* 6. Hero decorations (mask-image / blur) */
+.hero-grid-bg {
+  position:absolute; inset:0; pointer-events:none;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),
+                   linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:radial-gradient(ellipse 70% 60% at 50% 40%,black 30%,transparent 100%);
+  opacity:.35;
+}
+.hero-orb   { position:absolute; border-radius:50%; filter:blur(80px); pointer-events:none; }
+.hero-orb-1 { width:400px; height:400px; background:rgba(79,142,247,.12); top:-80px; left:50%; transform:translateX(-60%); }
+.hero-orb-2 { width:300px; height:300px; background:rgba(167,139,250,.08); bottom:0; right:0; }
+
+/* 7. Nav logo dot (breathe animation) */
+.nav-logo-dot { width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent); animation:breathe 3s ease-in-out infinite; flex-shrink:0; }
+
+/* 8. Toggle switch (::after pseudo-element) */
+.toggle { position:relative; width:32px; height:18px; flex-shrink:0; }
+.toggle input { opacity:0; width:0; height:0; position:absolute; }
+.toggle-track { position:absolute; inset:0; border-radius:9px; background:var(--border2); transition:background .2s; cursor:pointer; }
+.toggle-track::after { content:''; position:absolute; width:12px; height:12px; border-radius:50%; background:white; top:3px; left:3px; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.3); }
+.toggle input:checked ~ .toggle-track { background:var(--accent); }
+.toggle input:checked ~ .toggle-track::after { transform:translateX(14px); }
+
+/* 9. Form divider (::before/::after) */
+.form-divider { display:flex; align-items:center; gap:12px; margin:20px 0; color:var(--text3); font-size:12px; }
+.form-divider::before, .form-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* 10. Password eye + strength bar */
+.input-eye { position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--text3); cursor:pointer; font-size:16px; line-height:1; background:none; border:none; padding:0; }
+.strength-fill { height:100%; border-radius:2px; transition:width .3s,background .3s; width:0; }
+
+/* 11. Buttons (used in HTML + JS — too pervasive to inline) */
+.btn { display:inline-flex; align-items:center; gap:6px; padding:8px 18px; border-radius:var(--r); border:1px solid var(--border2); background:var(--surface); color:var(--text2); font-size:13px; font-weight:500; font-family:var(--sans); white-space:nowrap; cursor:pointer; transition:all .15s; text-decoration:none; }
+.btn:hover { border-color:var(--border3); color:var(--text); }
+.btn-primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+.btn-primary:hover { background:var(--accent-dk); border-color:var(--accent-dk); }
+.btn-ghost { background:none; border-color:transparent; color:var(--text2); }
+.btn-ghost:hover { background:var(--surface); border-color:var(--border); color:var(--text); }
+.btn-danger { background:var(--red-bg); border-color:rgba(247,111,111,.3); color:var(--red); }
+.btn-danger:hover { background:rgba(247,111,111,.2); }
+.btn-green { background:var(--green-bg); border-color:rgba(45,212,160,.3); color:var(--green); }
+.btn-green:hover { background:rgba(45,212,160,.2); }
+.btn-lg   { padding:12px 28px; font-size:15px; border-radius:var(--r-lg); }
+.btn-sm   { padding:5px 12px; font-size:12px; }
+.btn-full { width:100%; justify-content:center; }
+
+/* 12. Auth tabs (JS toggles .active) */
+.auth-tab { flex:1; padding:8px; border-radius:6px; border:none; background:none; color:var(--text2); font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; }
+.auth-tab.active { background:var(--surface2); color:var(--text); box-shadow:0 1px 4px var(--shadow); }
+
+/* 13. Filter chips + sem buttons (JS toggles .on) */
+.filter-chip { font-family:var(--mono); font-size:11px; padding:5px 12px; border-radius:20px; border:1px solid var(--border2); background:none; color:var(--text2); cursor:pointer; transition:all .15s; }
+.filter-chip:hover { border-color:var(--border3); color:var(--text); }
+.filter-chip.on { background:var(--accent-glow); border-color:var(--accent-line); color:var(--accent); }
+.sem-btn { flex:1; padding:8px; border-radius:var(--r); border:1px solid var(--border2); background:none; color:var(--text2); font-size:13px; cursor:pointer; transition:all .15s; }
+.sem-btn:hover { border-color:var(--border3); color:var(--text); }
+.sem-btn.on { background:var(--accent-glow); border-color:var(--accent-line); color:var(--accent); }
+
+/* 14. Add-row button (JS toggles .added) */
+.add-row-btn { width:28px; height:28px; border-radius:6px; border:1px solid var(--border2); background:none; color:var(--text2); font-size:18px; line-height:1; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .15s; }
+.add-row-btn:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-glow); }
+.add-row-btn.added { border-color:var(--green); color:var(--green); background:var(--green-bg); }
+
+/* 15. Pagination button (JS toggles .current) */
+.page-btn { width:28px; height:28px; border-radius:6px; border:1px solid var(--border2); background:none; color:var(--text2); font-size:12px; font-family:var(--mono); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .15s; }
+.page-btn:hover { border-color:var(--accent); color:var(--accent); }
+.page-btn.current { background:var(--accent-glow); border-color:var(--accent); color:var(--accent); }
+
+/* 16. Course table (static in HTML) */
+.course-table { width:100%; border-collapse:collapse; }
+.course-table th { padding:9px 14px; text-align:left; font-family:var(--mono); font-size:10px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; color:var(--text3); border-bottom:1px solid var(--border); background:var(--bg3); }
+.course-table td { padding:11px 14px; font-size:13px; border-bottom:1px solid var(--border); vertical-align:middle; }
+.course-table tr:last-child td { border-bottom:none; }
+.course-table tbody tr { transition:background .1s; }
+.course-table tbody tr:hover td { background:var(--surface); }
+.course-table tbody tr.row-selected td { background:var(--accent-glow); }
+
+/* 17. Variant buttons (JS toggles .active) */
+.variant-btn { width:100%; padding:8px 12px; border-radius:var(--r); border:1px solid var(--border2); background:none; color:var(--text2); font-size:12px; text-align:left; cursor:pointer; transition:all .15s; display:flex; align-items:center; gap:8px; }
+.variant-btn:hover { border-color:var(--border3); color:var(--text); }
+.variant-btn.active { background:var(--accent-glow); border-color:var(--accent-line); color:var(--accent); }
+.variant-dot { width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0; }
+
+/* 18. Alt chip (JS toggles .chosen) */
+.alt-chip { font-family:var(--mono); font-size:11px; padding:6px 14px; border:1px solid var(--border2); border-radius:var(--r); background:var(--bg2); color:var(--text2); cursor:pointer; transition:all .15s; }
+.alt-chip:hover { border-color:var(--border3); color:var(--text); }
+.alt-chip.chosen { background:var(--accent-glow); border-color:var(--accent-line); color:var(--accent); }
+
+/* 19. Status bar (JS sets .conflict / .clear) */
+.status-bar { display:none; }
+.status-bar.conflict { display:flex; align-items:center; gap:10px; margin:12px 16px 0; padding:10px 14px; border-radius:var(--r); font-size:12px; background:var(--red-bg); border:1px solid rgba(247,111,111,.3); color:var(--red); }
+.status-bar.clear    { display:flex; align-items:center; gap:10px; margin:12px 16px 0; padding:10px 14px; border-radius:var(--r); font-size:12px; background:var(--green-bg); border:1px solid rgba(45,212,160,.3); color:var(--green); }
+
+/* 20. Timetable (CSS grid — specific column template) */
+.tt-scroll { overflow-x:auto; }
+.tt-grid   { min-width:560px; }
+.tt-head   { display:grid; grid-template-columns:52px repeat(5,1fr); background:var(--bg3); border-bottom:1px solid var(--border); }
+.tt-head-cell { padding:10px 8px; text-align:center; font-family:var(--mono); font-size:10px; font-weight:500; letter-spacing:.06em; color:var(--text3); text-transform:uppercase; }
+.tt-head-cell:first-child { border-right:1px solid var(--border); }
+.tt-body { display:grid; grid-template-columns:52px repeat(5,1fr); }
+.tt-time  { height:52px; padding:4px 6px 0 0; font-family:var(--mono); font-size:9px; color:var(--text3); text-align:right; border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
+.tt-cell  { border-right:1px solid var(--border); border-bottom:1px solid var(--border); height:52px; position:relative; }
+.tt-cell:last-child { border-right:none; }
+.tt-cell:hover { background:rgba(79,142,247,.03); }
+
+/* 21. Class pills (absolute + animation) */
+.class-pill { position:absolute; left:3px; right:3px; border-radius:5px; padding:4px 7px; cursor:pointer; z-index:2; overflow:hidden; border-left:2px solid currentColor; }
+.class-pill:hover { transform:scale(1.03); box-shadow:0 4px 16px rgba(0,0,0,.4); z-index:10; }
+.class-pill.conflict { animation:flashRed .4s ease 3; }
+.pill-code { font-family:var(--mono); font-size:10px; font-weight:500; }
+.pill-type { font-size:9px; opacity:.65; text-transform:uppercase; letter-spacing:.04em; }
+.pill-name { font-size:10px; opacity:.7; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* 22. Alt drawer (animation) */
+.alt-drawer        { border-top:1px solid var(--border); padding:16px 20px; background:var(--bg3); animation:drawerIn .2s ease; }
+.alt-drawer-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.alt-drawer-title  { font-family:var(--display); font-size:14px; font-weight:700; }
+.alt-chips         { display:flex; gap:8px; flex-wrap:wrap; }
+
+/* 23. Overlay / modal (JS toggles .open) */
+.overlay { opacity:0; pointer-events:none; transition:opacity .2s; }
+.overlay.open { opacity:1; pointer-events:all; }
+.modal { transform:scale(.96) translateY(8px); transition:transform .2s; }
+.overlay.open .modal { transform:scale(1) translateY(0); }
+
+/* 24. Toast (animation) */
+#toast-container { position:fixed; bottom:24px; right:24px; z-index:200; display:flex; flex-direction:column; gap:8px; }
+.toast { background:var(--surface2); border:1px solid var(--border2); border-radius:var(--r); padding:10px 18px; font-family:var(--mono); font-size:12px; color:var(--text); box-shadow:0 8px 24px var(--shadow); display:flex; align-items:center; gap:8px; animation:toastIn .2s ease, toastOut .2s ease 1.8s forwards; }
+.toast.success { border-color:rgba(45,212,160,.35); }
+.toast.error   { border-color:rgba(247,111,111,.35); }
+
+/* 25. Nav link (JS toggles .active) */
+.nav-link { font-size:13px; color:var(--text2); padding:6px 12px; border-radius:var(--r); border:1px solid transparent; background:none; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all .15s; }
+.nav-link:hover  { color:var(--text); background:var(--surface); }
+.nav-link.active { color:var(--accent); background:var(--accent-glow); border-color:var(--accent-line); }
+
+/* 26. Sidebar link (JS toggles .active) */
+.sidebar-link { display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius:var(--r); border:1px solid transparent; background:none; font-size:14px; color:var(--text2); text-decoration:none; transition:all .15s; }
+.sidebar-link:hover  { color:var(--text); background:var(--surface); }
+.sidebar-link.active { color:var(--accent); background:var(--accent-glow); border-color:var(--accent-line); }
+
+/* 27. Sidebar slide transitions */
+.sidebar-overlay { position:fixed; inset:0; z-index:60; background:rgba(0,0,0,.55); backdrop-filter:blur(3px); opacity:0; pointer-events:none; transition:opacity .25s; }
+.sidebar-overlay.open { opacity:1; pointer-events:all; }
+.sidebar { position:fixed; top:0; left:0; bottom:0; z-index:70; width:280px; max-width:85vw; background:var(--bg2); border-right:1px solid var(--border); display:flex; flex-direction:column; transform:translateX(-100%); transition:transform .25s; box-shadow:8px 0 40px var(--shadow-lg); }
+.sidebar.open { transform:translateX(0); }
+
+/* 28. Floating sidebar trigger */
+.sidebar-fab { position:fixed; left:0; top:50%; z-index:55; transform:translateY(-50%); width:36px; height:52px; border-radius:0 26px 26px 0; background:var(--accent); border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:3px 0 18px rgba(79,142,247,.35); transition:width .2s,box-shadow .2s; }
+.sidebar-fab:hover { width:44px; box-shadow:4px 0 24px rgba(79,142,247,.5); }
+.sidebar-fab-icon { color:#fff; font-size:20px; line-height:1; font-family:var(--mono); font-weight:700; transition:transform .25s; display:block; }
+.sidebar-fab.open .sidebar-fab-icon { transform:rotate(180deg); }
+@media (min-width:768px) { .sidebar-fab { display:none !important; } }
+
+/* 29. Mobile responsive */
+@media (max-width:767px) {
+  #appNav { display:flex !important; justify-content:space-between; }
+  #toast-container { right:12px; bottom:12px; }
+  #summaryBar > div + div { border-left:none; border-top:1px solid var(--border); }
+}
