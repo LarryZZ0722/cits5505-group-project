@@ -84,3 +84,10 @@ npm run watch        # rebuild automatically while developing
 ## Running the tests
 
 *Coming soon.*
+
+## Backend Status
+
+Flask backend successfully running on http://localhost:5000
+Verified endpoint: /api/health
+Server responds correctly with JSON ({"status": "ok"})
+Backend environment set up and tested locally
