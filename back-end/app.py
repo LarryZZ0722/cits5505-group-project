@@ -15,7 +15,9 @@ from flask_jwt_extended import (
     jwt_required, get_jwt_identity,
 )
 from models import db, User, Timetable, TimetableEntry, Friendship, FriendRequest
-
+from auth import auth_bp
+from profile import profile_bp
+from friends import friends_bp
 # ── App & config ──────────────────────────────────────────────────────
 BASE_DIR     = os.path.dirname(os.path.abspath(__file__))
 COURSES_PATH = os.path.join(BASE_DIR, '..', 'front-end', 'data', 'courses.json')
@@ -31,6 +33,9 @@ app.config.update(
 
 db.init_app(app)
 jwt = JWTManager(app)
+app.register_blueprint(auth_bp)
+app.register_blueprint(profile_bp)
+app.register_blueprint(friends_bp)
 
 # ── CORS ──────────────────────────────────────────────────────────────
 _ALLOWED_ORIGINS = {
