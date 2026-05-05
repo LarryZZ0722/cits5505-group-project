@@ -18,7 +18,7 @@ from models import db, User, Timetable, TimetableEntry, Friendship, FriendReques
 
 # ── App & config ──────────────────────────────────────────────────────
 BASE_DIR     = os.path.dirname(os.path.abspath(__file__))
-COURSES_PATH = os.path.join(BASE_DIR, '..', 'front-end', 'data', 'courses.json')
+
 
 app = Flask(__name__)
 app.config.update(
@@ -31,6 +31,11 @@ app.config.update(
 
 db.init_app(app)
 jwt = JWTManager(app)
+
+from courses import courses_bp
+app.register_blueprint(courses_bp)
+from timetable import timetable_bp
+app.register_blueprint(timetable_bp)
 
 # ── CORS ──────────────────────────────────────────────────────────────
 _ALLOWED_ORIGINS = {
@@ -61,15 +66,6 @@ def get_initials(name: str) -> str:
     parts = name.strip().split()
     return ''.join(p[0] for p in parts if p)[:2].upper()
 
-_courses_cache = None
-
-def load_courses() -> list:
-    global _courses_cache
-    if _courses_cache is None:
-        with open(COURSES_PATH, encoding='utf-8') as f:
-            _courses_cache = json.load(f)
-    return _courses_cache
-
 def current_user() -> User:
     return db.session.get(User, int(get_jwt_identity()))
 
@@ -90,87 +86,6 @@ def user_dict(u: User) -> dict:
         'email':         u.email,
         'studentNumber': u.student_number,
     }
-
-# ── Scheduling logic ──────────────────────────────────────────────────
-def get_active_sessions(course: dict, alt_idx: int) -> list:
-    """Return sessions for a unit given the chosen alternative index."""
-    base = list(course.get('sessions', []))
-    alts = course.get('alternatives', [])
-    if alt_idx == 0 or not alts:
-        return base
-    alt = alts[alt_idx - 1] if alt_idx - 1 < len(alts) else []
-    if alt:
-        alt_type = alt[0]['type']
-        base = [s for s in base if s['type'] != alt_type]
-    return base + alt
-
-def detect_conflicts(selected: list, courses: list) -> set:
-    """Return set of unit codes involved in a time clash."""
-    slots = []
-    for entry in selected:
-        course = next((c for c in courses if c['code'] == entry.get('code')), None)
-        if not course:
-            continue
-        for s in get_active_sessions(course, entry.get('altIdx', 0)):
-            slots.append((s['day'], s['hour'], s['hour'] + s['duration'], entry['code']))
-
-    conflicts = set()
-    for i in range(len(slots)):
-        for j in range(i + 1, len(slots)):
-            a, b = slots[i], slots[j]
-            if a[0] == b[0] and a[1] < b[2] and b[1] < a[2]:
-                conflicts.add(a[3])
-                conflicts.add(b[3])
-    return conflicts
-
-def run_auto_schedule(selected: list, courses: list, prefs: dict) -> list:
-    """Greedy: for each unit pick the alt slot with the lowest penalty score."""
-    avoid_8am    = prefs.get('avoid8am', False)
-    compact_days = prefs.get('compactDays', False)
-    free_fridays = prefs.get('freeFridays', False)
-    result = [dict(e) for e in selected]
-
-    for i, entry in enumerate(result):
-        course = next((c for c in courses if c['code'] == entry['code']), None)
-        if not course or not course.get('alternatives'):
-            continue
-
-        best_alt, best_score = entry.get('altIdx', 0), float('inf')
-
-        for alt in range(len(course['alternatives']) + 1):
-            test = [dict(e) for e in result]
-            test[i]['altIdx'] = alt
-            n_clash    = len(detect_conflicts(test, courses))
-            sessions   = get_active_sessions(course, alt)
-            pen_8am    = 10 if avoid_8am    and any(s['hour'] == 8 for s in sessions) else 0
-            pen_fri    = 10 if free_fridays and any(s['day']  == 4 for s in sessions) else 0
-            pen_spread = len({s['day'] for s in sessions}) if compact_days else 0
-            score      = n_clash * 100 + pen_8am + pen_fri + pen_spread
-
-            if score < best_score:
-                best_score, best_alt = score, alt
-
-        result[i]['altIdx'] = best_alt
-    return result
-
-# ── Timetable helpers ─────────────────────────────────────────────────
-def ensure_timetable(user: User) -> Timetable:
-    if not user.timetable:
-        tt = Timetable(user_id=user.id)
-        db.session.add(tt)
-        db.session.flush()
-        return tt
-    return user.timetable
-
-def replace_entries(tt: Timetable, selected: list) -> None:
-    TimetableEntry.query.filter_by(timetable_id=tt.id).delete()
-    for pos, item in enumerate(selected):
-        db.session.add(TimetableEntry(
-            timetable_id = tt.id,
-            unit_code    = item['code'],
-            alt_idx      = item.get('altIdx', 0),
-            position     = pos,
-        ))
 
 # ── Error handlers ────────────────────────────────────────────────────
 @app.errorhandler(404)
@@ -302,70 +217,9 @@ def update_profile():
     return jsonify({'user': user_dict(user)})
 
 
-# ════════════════════════════════════════
-# COURSES  /api/courses
-# ════════════════════════════════════════
-@app.get('/api/courses')
-def get_courses():
-    return jsonify(load_courses())
 
 
-@app.get('/api/courses/<code>')
-def get_course(code):
-    course = next((c for c in load_courses() if c['code'] == code.upper()), None)
-    if not course:
-        return err('Course not found', 404)
-    return jsonify(course)
 
-
-# ════════════════════════════════════════
-# TIMETABLE  /api/timetable
-# ════════════════════════════════════════
-@app.get('/api/timetable')
-@jwt_required()
-def get_timetable():
-    user = current_user()
-    tt   = ensure_timetable(user)
-    db.session.commit()
-    return jsonify(tt.to_dict())
-
-
-@app.post('/api/timetable')
-@jwt_required()
-def save_timetable():
-    user = current_user()
-    data = request.get_json(silent=True) or {}
-    tt   = ensure_timetable(user)
-
-    if data.get('selected') is not None:
-        replace_entries(tt, data['selected'])
-    if data.get('semester') is not None:
-        tt.semester = data['semester']
-    if data.get('name') is not None:
-        tt.name = data['name']
-    if data.get('isPublic') is not None:
-        tt.is_public = bool(data['isPublic'])
-    tt.updated_at = datetime.utcnow()
-
-    db.session.commit()
-    return ok()
-
-
-@app.post('/api/timetable/conflicts')
-@jwt_required()
-def timetable_conflicts():
-    data     = request.get_json(silent=True) or {}
-    selected = data.get('selected', [])
-    return jsonify({'conflicts': list(detect_conflicts(selected, load_courses()))})
-
-
-@app.post('/api/timetable/auto-schedule')
-@jwt_required()
-def timetable_auto_schedule():
-    data     = request.get_json(silent=True) or {}
-    selected = data.get('selected', [])
-    prefs    = data.get('preferences', {})
-    return jsonify({'selected': run_auto_schedule(selected, load_courses(), prefs)})
 
 
 # ════════════════════════════════════════
