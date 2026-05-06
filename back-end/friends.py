@@ -16,6 +16,7 @@ from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required
 from models import db, User, Friendship, FriendRequest
 from utils import ok, err, current_user, user_dict
+from limiter import limiter
 
 friends_bp = Blueprint('friends', __name__)
 
@@ -66,6 +67,7 @@ def get_sent_requests():
 
 @friends_bp.post('/api/friends/requests')
 @jwt_required()
+@limiter.limit('10 per minute')
 def send_friend_request():
     user      = current_user()
     data      = request.get_json(silent=True) or {}
