@@ -1,7 +1,7 @@
 """
 courses.py — Unit catalogue and custom course management
 
-  GET    /api/courses
+  GET    /api/courses               ?semester=S1 &faculty=CSSE &search=python
   GET    /api/courses/<code>
   GET    /api/courses/custom
   POST   /api/courses/custom
@@ -19,7 +19,19 @@ courses_bp = Blueprint('courses', __name__)
 
 @courses_bp.get('/api/courses')
 def get_courses():
-    return jsonify(load_courses())
+    courses  = load_courses()
+    semester = request.args.get('semester', '').strip()
+    faculty  = request.args.get('faculty',  '').strip()
+    search   = request.args.get('search',   '').strip().lower()
+
+    if semester:
+        courses = [c for c in courses if semester in c.get('sems', [])]
+    if faculty:
+        courses = [c for c in courses if c.get('faculty') == faculty]
+    if search:
+        courses = [c for c in courses if search in c.get('code', '').lower()
+                                      or search in c.get('name', '').lower()]
+    return jsonify(courses)
 
 
 @courses_bp.get('/api/courses/<code>')

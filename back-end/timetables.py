@@ -6,7 +6,9 @@ timetables.py — Timetable CRUD, conflict detection, and auto-scheduling
   GET    /api/timetables/<id>
   PUT    /api/timetables/<id>
   DELETE /api/timetables/<id>
+  GET    /api/timetables/<id>/export
   POST   /api/timetables/<id>/conflicts
+  GET    /api/timetables/<id>/compare/<other_id>
   POST   /api/timetables/<id>/auto-schedule
 """
 
@@ -17,6 +19,8 @@ from models import db, User, Timetable, TimetableEntry, CustomCourse
 from utils import ok, err, current_user, load_courses
 
 timetables_bp = Blueprint('timetables', __name__)
+
+DAY_NAMES = {0: 'Monday', 1: 'Tuesday', 2: 'Wednesday', 3: 'Thursday', 4: 'Friday'}
 
 
 # ── Pure scheduling helpers ───────────────────────────────────────────
@@ -65,7 +69,6 @@ def run_auto_schedule(selected: list, courses: list, prefs: dict) -> list:
 
         best_alt, best_score = entry.get('altIdx', 0), float('inf')
 
-        # Days already occupied by every other unit (for compact scoring)
         other_days = set()
         if compact_days:
             for j, other in enumerate(result):
@@ -113,6 +116,18 @@ def _get_tt(user: User, tt_id: int):
 
 def _sorted(user: User) -> list:
     return sorted(user.timetables, key=lambda t: t.updated_at or datetime.min, reverse=True)
+
+
+def _fmt(hour: int) -> str:
+    return f'{hour:02d}:00'
+
+
+def _all_courses(user: User) -> list:
+    return load_courses() + [r.to_dict() for r in CustomCourse.query.filter_by(user_id=user.id).all()]
+
+
+def _course_map(courses: list) -> dict:
+    return {c['code']: c for c in courses}
 
 
 # ── Routes ────────────────────────────────────────────────────────────
@@ -176,6 +191,43 @@ def delete_timetable(tt_id):
     return ok()
 
 
+@timetables_bp.get('/api/timetables/<int:tt_id>/export')
+@jwt_required()
+def export_timetable(tt_id):
+    user = current_user()
+    tt   = _get_tt(user, tt_id)
+    if not tt:
+        return err('Timetable not found', 404)
+
+    cmap = _course_map(_all_courses(user))
+    rows = []
+    for entry in tt.entries:
+        course = cmap.get(entry.unit_code, {})
+        for s in get_active_sessions(course, entry.alt_idx):
+            rows.append({
+                'day_int': s['day'],
+                'day':     DAY_NAMES.get(s['day'], '?'),
+                'hour':    s['hour'],
+                'end':     s['hour'] + s['duration'],
+                'type':    s.get('type', ''),
+                'code':    entry.unit_code,
+                'name':    course.get('name', ''),
+            })
+
+    rows.sort(key=lambda r: (r['day_int'], r['hour']))
+
+    lines = [f"=== {tt.name} ({tt.semester}) ===", '']
+    current_day = None
+    for r in rows:
+        if r['day'] != current_day:
+            current_day = r['day']
+            lines.append(f"[ {r['day']} ]")
+        lines.append(f"  {_fmt(r['hour'])} - {_fmt(r['end'])}  {r['type']}  {r['code']}  {r['name']}")
+
+    lines += ['', f"Total units: {len(tt.entries)}"]
+    return jsonify({'timetable_id': tt_id, 'text': '\n'.join(lines)})
+
+
 @timetables_bp.post('/api/timetables/<int:tt_id>/conflicts')
 @jwt_required()
 def timetable_conflicts(tt_id):
@@ -183,10 +235,105 @@ def timetable_conflicts(tt_id):
     tt   = _get_tt(user, tt_id)
     if not tt:
         return err('Timetable not found', 404)
+
     data     = request.get_json(silent=True) or {}
     selected = data.get('selected', [e.to_dict() for e in tt.entries])
-    courses  = load_courses() + [r.to_dict() for r in CustomCourse.query.filter_by(user_id=user.id).all()]
-    return jsonify({'conflicts': list(detect_conflicts(selected, courses))})
+    courses  = _all_courses(user)
+    cmap     = _course_map(courses)
+
+    # Build (day, start, end, code, type) slots for every active session
+    slots = []
+    for entry in selected:
+        course = cmap.get(entry.get('code', ''))
+        if not course:
+            continue
+        for s in get_active_sessions(course, entry.get('altIdx', 0)):
+            slots.append({
+                'code':  entry['code'],
+                'name':  course.get('name', ''),
+                'type':  s.get('type', ''),
+                'day':   s['day'],
+                'start': s['hour'],
+                'end':   s['hour'] + s['duration'],
+            })
+
+    conflicts = []
+    seen = set()
+    for i in range(len(slots)):
+        for j in range(i + 1, len(slots)):
+            a, b = slots[i], slots[j]
+            if a['day'] == b['day'] and a['start'] < b['end'] and b['start'] < a['end']:
+                key = tuple(sorted([
+                    (a['code'], a['type'], a['day'], a['start']),
+                    (b['code'], b['type'], b['day'], b['start']),
+                ]))
+                if key in seen:
+                    continue
+                seen.add(key)
+                conflicts.append({
+                    'day':    DAY_NAMES.get(a['day']),
+                    'unit_a': {'code': a['code'], 'name': a['name'], 'type': a['type'],
+                               'start': _fmt(a['start']), 'end': _fmt(a['end'])},
+                    'unit_b': {'code': b['code'], 'name': b['name'], 'type': b['type'],
+                               'start': _fmt(b['start']), 'end': _fmt(b['end'])},
+                    'detail': (f"{DAY_NAMES.get(a['day'])}: "
+                               f"{a['code']} {a['type']} ({_fmt(a['start'])}–{_fmt(a['end'])}) "
+                               f"overlaps {b['code']} {b['type']} ({_fmt(b['start'])}–{_fmt(b['end'])})"),
+                })
+
+    return jsonify({'conflict_count': len(conflicts), 'conflicts': conflicts})
+
+
+@timetables_bp.get('/api/timetables/<int:tt_id>/compare/<int:other_id>')
+@jwt_required()
+def compare_timetables(tt_id, other_id):
+    user = current_user()
+    tt_a = _get_tt(user, tt_id)
+    tt_b = _get_tt(user, other_id)
+    if not tt_a:
+        return err(f'Timetable {tt_id} not found', 404)
+    if not tt_b:
+        return err(f'Timetable {other_id} not found', 404)
+
+    courses = _all_courses(user)
+    cmap    = _course_map(courses)
+
+    codes_a = {e.unit_code for e in tt_a.entries}
+    codes_b = {e.unit_code for e in tt_b.entries}
+
+    def _entry_info(e):
+        return {'code': e.unit_code, 'name': cmap.get(e.unit_code, {}).get('name', ''), 'altIdx': e.alt_idx}
+
+    only_in_a = [_entry_info(e) for e in tt_a.entries if e.unit_code not in codes_b]
+    only_in_b = [_entry_info(e) for e in tt_b.entries if e.unit_code not in codes_a]
+    in_both   = [_entry_info(e) for e in tt_a.entries if e.unit_code in codes_b]
+
+    cross_conflicts = []
+    for ea in tt_a.entries:
+        ca = cmap.get(ea.unit_code, {})
+        for eb in tt_b.entries:
+            if ea.unit_code == eb.unit_code:
+                continue
+            cb = cmap.get(eb.unit_code, {})
+            for sa in get_active_sessions(ca, ea.alt_idx):
+                for sb in get_active_sessions(cb, eb.alt_idx):
+                    if sa['day'] == sb['day'] and sa['hour'] < sb['hour'] + sb['duration'] and sb['hour'] < sa['hour'] + sa['duration']:
+                        cross_conflicts.append({
+                            'day':    DAY_NAMES.get(sa['day']),
+                            'from_a': {'code': ea.unit_code, 'type': sa.get('type'),
+                                       'start': _fmt(sa['hour']), 'end': _fmt(sa['hour'] + sa['duration'])},
+                            'from_b': {'code': eb.unit_code, 'type': sb.get('type'),
+                                       'start': _fmt(sb['hour']), 'end': _fmt(sb['hour'] + sb['duration'])},
+                        })
+
+    return jsonify({
+        'timetable_a':     {'id': tt_id,    'name': tt_a.name},
+        'timetable_b':     {'id': other_id, 'name': tt_b.name},
+        'only_in_a':       only_in_a,
+        'only_in_b':       only_in_b,
+        'in_both':         in_both,
+        'cross_conflicts': cross_conflicts,
+    })
 
 
 @timetables_bp.post('/api/timetables/<int:tt_id>/auto-schedule')
@@ -199,5 +346,5 @@ def timetable_auto_schedule(tt_id):
     data     = request.get_json(silent=True) or {}
     selected = data.get('selected', [e.to_dict() for e in tt.entries])
     prefs    = data.get('preferences', {})
-    courses  = load_courses() + [r.to_dict() for r in CustomCourse.query.filter_by(user_id=user.id).all()]
+    courses  = _all_courses(user)
     return jsonify({'selected': run_auto_schedule(selected, courses, prefs)})
