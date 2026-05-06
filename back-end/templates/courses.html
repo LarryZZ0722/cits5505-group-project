@@ -22,6 +22,25 @@
           <div class="flex gap-2 flex-wrap items-center px-5 py-4 border-b border-[var(--border)]">
             <button class="filter-chip on" data-sem="S1">Sem 1</button>
             <button class="filter-chip on" data-sem="S2">Sem 2</button>
+            <!-- Faculty filter -->
+            <select
+              id="facultyFilter"
+              class="py-[5px] px-[10px] bg-[var(--bg3)] border border-[var(--border)] rounded text-[var(--text2)] text-[12px] font-mono outline-none cursor-pointer hover:border-[var(--border3)] transition-colors focus:border-[var(--accent)]">
+              <option value="">All faculties</option>
+              <option value="CSSE">CSSE</option>
+              <option value="Mathematics">Mathematics</option>
+              <option value="Physics">Physics</option>
+              <option value="Chemistry">Chemistry</option>
+              <option value="Biology">Biology</option>
+              <option value="Engineering">Engineering</option>
+              <option value="Economics">Economics</option>
+              <option value="Business">Business</option>
+              <option value="Arts">Arts</option>
+              <option value="Law">Law</option>
+              <option value="Psychology">Psychology</option>
+              <option value="Health Sciences">Health Sciences</option>
+              <option value="Environmental Science">Environmental Science</option>
+            </select>
             <span class="flex-1"></span>
             <span class="font-mono text-[11px] text-[var(--text3)]" id="tableCount">— units</span>
           </div>
