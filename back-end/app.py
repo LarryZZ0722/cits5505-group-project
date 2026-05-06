@@ -24,8 +24,10 @@ from datetime import timedelta
 from flask import Flask, request, make_response, jsonify
 from flask_jwt_extended import JWTManager
 from flask_wtf.csrf import CSRFProtect, CSRFError
+from flask_limiter.errors import RateLimitExceeded
 from models import db, User, Friendship
 from utils import err
+from limiter import limiter
 from auth import auth_bp
 from users import users_bp
 from timetables import timetables_bp
@@ -50,6 +52,7 @@ app.config.update(
 db.init_app(app)
 jwt = JWTManager(app)
 csrf = CSRFProtect(app)
+limiter.init_app(app)
 app.register_blueprint(auth_bp)
 app.register_blueprint(users_bp)
 app.register_blueprint(timetables_bp)
@@ -101,6 +104,10 @@ def add_cors(response):
     return response
 
 # ── Error handlers ────────────────────────────────────────────────────
+@app.errorhandler(RateLimitExceeded)
+def rate_limit_exceeded(_):
+    return err('Too many requests, please slow down.', 429)
+
 @app.errorhandler(404)
 def not_found(_):
     return err('Not found', 404)
