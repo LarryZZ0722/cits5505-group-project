@@ -21,7 +21,7 @@ Start the server
 
 import os
 from datetime import timedelta
-from flask import Flask, request, make_response, jsonify
+from flask import Flask, request, make_response, jsonify, current_app
 from flask_jwt_extended import JWTManager
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from models import db, User, Friendship
@@ -32,117 +32,131 @@ from timetables import timetables_bp
 from friends import friends_bp
 from courses import courses_bp
 from pages import pages_bp
-from seed import seed
 
-# ── App & config ──────────────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-app = Flask(__name__)  # templates/ and static/ live inside back-end/ by convention
-app.config.update(
-    SECRET_KEY                     = os.environ.get('SECRET_KEY', 'dev-secret-change-in-production'),
-    SQLALCHEMY_DATABASE_URI        = f'sqlite:///{os.path.join(BASE_DIR, "planner.db")}',
-    SQLALCHEMY_TRACK_MODIFICATIONS = False,
-    JWT_SECRET_KEY                 = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-key-change-in-production'),
-    JWT_ACCESS_TOKEN_EXPIRES       = timedelta(days=7),
-    WTF_CSRF_TIME_LIMIT            = None,
-)
-
-db.init_app(app)
-jwt = JWTManager(app)
-csrf = CSRFProtect(app)
-app.register_blueprint(auth_bp)
-app.register_blueprint(users_bp)
-app.register_blueprint(timetables_bp)
-app.register_blueprint(friends_bp)
-app.register_blueprint(courses_bp)
-app.register_blueprint(pages_bp)
-
-# ── CSRF ──────────────────────────────────────────────────────────────
 _CSRF_EXEMPT = ('/api/auth/login', '/api/auth/register', '/api/health')
 
-@app.before_request
-def check_csrf():
-    if request.method not in ('POST', 'PUT', 'PATCH', 'DELETE'):
-        return
-    if any(request.path.startswith(p) for p in _CSRF_EXEMPT):
-        return
-    from flask_wtf.csrf import validate_csrf
-    try:
-        validate_csrf(request.headers.get('X-CSRF-Token', ''))
-    except Exception:
-        return err('CSRF validation failed', 400)
-
-@app.errorhandler(CSRFError)
-def csrf_error(_):
-    return err('CSRF validation failed', 400)
-
-# ── CORS ──────────────────────────────────────────────────────────────
 _ALLOWED_ORIGINS = {
     'http://localhost:5500', 'http://127.0.0.1:5500',
     'http://localhost:3000', 'http://127.0.0.1:3000',
     'http://localhost:8080', 'http://127.0.0.1:8080',
 }
 
-@app.before_request
-def handle_preflight():
-    if request.method == 'OPTIONS':
-        return make_response('', 204)
 
-@app.after_request
-def add_cors(response):
-    origin = request.headers.get('Origin', '')
-    if origin in _ALLOWED_ORIGINS:
-        response.headers['Access-Control-Allow-Origin']      = origin
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
-        response.headers['Access-Control-Allow-Headers']     = 'Content-Type, Authorization'
-        response.headers['Access-Control-Allow-Methods']     = 'GET, POST, PUT, DELETE, OPTIONS'
-        response.headers['Access-Control-Max-Age']           = '86400'
-        response.headers['Access-Control-Expose-Headers']    = 'Authorization'
-    return response
+def create_app(test_config=None):
+    app = Flask(__name__)
+    app.config.update(
+        SECRET_KEY                     = os.environ.get('SECRET_KEY', 'dev-secret-change-in-production'),
+        SQLALCHEMY_DATABASE_URI        = f'sqlite:///{os.path.join(BASE_DIR, "planner.db")}',
+        SQLALCHEMY_TRACK_MODIFICATIONS = False,
+        JWT_SECRET_KEY                 = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-key-change-in-production'),
+        JWT_ACCESS_TOKEN_EXPIRES       = timedelta(days=7),
+        WTF_CSRF_TIME_LIMIT            = None,
+    )
+    if test_config:
+        app.config.update(test_config)
 
-# ── Error handlers ────────────────────────────────────────────────────
-@app.errorhandler(404)
-def not_found(_):
-    return err('Not found', 404)
+    db.init_app(app)
+    JWTManager(app)
+    CSRFProtect(app)
 
-@app.errorhandler(405)
-def method_not_allowed(_):
-    return err('Method not allowed', 405)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(users_bp)
+    app.register_blueprint(timetables_bp)
+    app.register_blueprint(friends_bp)
+    app.register_blueprint(courses_bp)
+    app.register_blueprint(pages_bp)
 
-@app.errorhandler(500)
-def internal_error(e):
-    db.session.rollback()
-    app.logger.error(str(e))
-    return err('Internal server error', 500)
+    # ── CSRF ──────────────────────────────────────────────────────────────
+    @app.before_request
+    def check_csrf():
+        if current_app.testing or not current_app.config.get('WTF_CSRF_ENABLED', True):
+            return
+        if request.method not in ('POST', 'PUT', 'PATCH', 'DELETE'):
+            return
+        if any(request.path.startswith(p) for p in _CSRF_EXEMPT):
+            return
+        from flask_wtf.csrf import validate_csrf
+        try:
+            validate_csrf(request.headers.get('X-CSRF-Token', ''))
+        except Exception:
+            return err('CSRF validation failed', 400)
 
-@jwt.unauthorized_loader
-def missing_token(_):
-    return err('Not authenticated', 401)
+    @app.errorhandler(CSRFError)
+    def csrf_error(_):
+        return err('CSRF validation failed', 400)
 
-@jwt.invalid_token_loader
-def invalid_token(_):
-    return err('Invalid token', 401)
+    # ── CORS ──────────────────────────────────────────────────────────────
+    @app.before_request
+    def handle_preflight():
+        if request.method == 'OPTIONS':
+            return make_response('', 204)
 
-@jwt.expired_token_loader
-def expired_token(*_):
-    return err('Token expired — please log in again', 401)
+    @app.after_request
+    def add_cors(response):
+        origin = request.headers.get('Origin', '')
+        if origin in _ALLOWED_ORIGINS:
+            response.headers['Access-Control-Allow-Origin']      = origin
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            response.headers['Access-Control-Allow-Headers']     = 'Content-Type, Authorization'
+            response.headers['Access-Control-Allow-Methods']     = 'GET, POST, PUT, DELETE, OPTIONS'
+            response.headers['Access-Control-Max-Age']           = '86400'
+            response.headers['Access-Control-Expose-Headers']    = 'Authorization'
+        return response
 
-@app.get('/api/debug/seed')
-def debug_seed():
-    rows = []
-    for u in User.query.all():
-        for tt in u.timetables:
-            rows.append({'user': u.name, 'tt': tt.name, 'public': tt.is_public})
-    fs = [{'user': f.user_id, 'friend': f.friend_id} for f in Friendship.query.all()]
-    return jsonify({'timetables': rows, 'friendships': fs})
+    # ── Error handlers ────────────────────────────────────────────────────
+    @app.errorhandler(404)
+    def not_found(_):
+        return err('Not found', 404)
 
-# ── Startup ───────────────────────────────────────────────────────────
-with app.app_context():
-    db.create_all()
-    seed()
-    print('[ok] Database ready')
-    print('[ok] Demo users seeded  (password: demo1234)')
+    @app.errorhandler(405)
+    def method_not_allowed(_):
+        return err('Method not allowed', 405)
+
+    @app.errorhandler(500)
+    def internal_error(e):
+        db.session.rollback()
+        app.logger.error(str(e))
+        return err('Internal server error', 500)
+
+    @app.get('/api/debug/seed')
+    def debug_seed():
+        rows = []
+        for u in User.query.all():
+            for tt in u.timetables:
+                rows.append({'user': u.name, 'tt': tt.name, 'public': tt.is_public})
+        fs = [{'user': f.user_id, 'friend': f.friend_id} for f in Friendship.query.all()]
+        return jsonify({'timetables': rows, 'friendships': fs})
+
+    # ── JWT error handlers ────────────────────────────────────────────────
+    jwt = app.extensions['flask-jwt-extended']
+
+    @jwt.unauthorized_loader
+    def missing_token(_):
+        return err('Not authenticated', 401)
+
+    @jwt.invalid_token_loader
+    def invalid_token(_):
+        return err('Invalid token', 401)
+
+    @jwt.expired_token_loader
+    def expired_token(*_):
+        return err('Token expired — please log in again', 401)
+
+    with app.app_context():
+        db.create_all()
+
+    return app
+
+
+app = create_app()
 
 if __name__ == '__main__':
+    from seed import seed
+    with app.app_context():
+        seed()
+    print('[ok] Database ready')
+    print('[ok] Demo users seeded  (password: demo1234)')
     print('[ok] Running on http://localhost:5000')
     app.run(debug=True, port=5000)
