@@ -177,3 +177,13 @@ async function handleSignup() {
     toast(err.message, "error");
   }
 }
+/*_____Forgot Password_____*/
+
+const forgotPasswordLink = document.getElementById("forgotPasswordLink");
+
+if (forgotPasswordLink) {
+  forgotPasswordLink.addEventListener("click", function (event) {
+    event.preventDefault();
+    alert("Password reset is not available yet.");
+  });
+}
