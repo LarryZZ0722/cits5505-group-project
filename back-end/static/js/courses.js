@@ -86,7 +86,6 @@ async function saveSelected() {
     return true;
   } catch (e) {
     console.error("updateTimetable failed:", e);
-    toast(e.message || "Could not save selection", "error");
     return false;
   }
 }
@@ -286,11 +285,13 @@ function renderPagination(total) {
 }
 
 /* ── Toggle course in/out of selection ───── */
+/* ── Toggle course in/out of selection ───── */
 async function toggleCourse(code) {
   if (!State.getUser()) {
     window.location.href = "/auth";
     return;
   }
+
   const previousSelected = [...selected];
   const previousCourses = [...allCourses];
 
@@ -298,6 +299,7 @@ async function toggleCourse(code) {
 
   if (wasAdded) {
     selected = selected.filter(x => x.code !== code);
+
     const course = allCourses.find(c => c.code === code);
     if (course?.custom) {
       allCourses = allCourses.filter(c => c.code !== code);
@@ -321,8 +323,8 @@ async function toggleCourse(code) {
 
     toast(
       wasAdded
-        ? `Could not remove ${code}. Please try again.`
-        : `Could not add ${code}. Please try again.`,
+        ? `Could not remove ${code}. Please check your connection and try again.`
+        : `Could not add ${code}. Please check your connection and try again.`,
       "error"
     );
 
