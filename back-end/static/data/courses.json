@@ -1,0 +1,1492 @@
+[
+  {
+    "code": "CITS1003",
+    "name": "Introduction to Cybersecurity",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 9,  "duration": 2 },
+      { "type": "LAB", "day": 2, "hour": 14, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 3, "hour": 10, "duration": 2 }],
+      [{ "type": "LAB", "day": 4, "hour": 14, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "CITS1401",
+    "name": "Computational Thinking with Python",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 10, "duration": 2 },
+      { "type": "LAB", "day": 3, "hour": 14, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 2, "hour": 12, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "CITS1402",
+    "name": "Relational Database Management Systems",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 11, "duration": 2 },
+      { "type": "LAB", "day": 2, "hour": 9,  "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 4, "hour": 11, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "CITS2200",
+    "name": "Data Structures and Algorithms",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 13, "duration": 2 },
+      { "type": "LAB", "day": 4, "hour": 10, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 0, "hour": 15, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "CITS2401",
+    "name": "Computer Analysis and Visualisation",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 3, "hour": 10, "duration": 2 },
+      { "type": "LAB", "day": 1, "hour": 15, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 0, "hour": 13, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "CITS3001",
+    "name": "Algorithms, Agents and Artificial Intelligence",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 11, "duration": 2 },
+      { "type": "LAB", "day": 4, "hour": 13, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 1, "hour": 9,  "duration": 2 }]
+    ]
+  },
+  {
+    "code": "CITS3002",
+    "name": "Computer Networks",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 14, "duration": 2 },
+      { "type": "LAB", "day": 3, "hour": 9,  "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 2, "hour": 15, "duration": 2 }],
+      [{ "type": "LAB", "day": 4, "hour": 9,  "duration": 2 }]
+    ]
+  },
+  {
+    "code": "CITS3003",
+    "name": "Graphics and Animation",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 8,  "duration": 2 },
+      { "type": "LAB", "day": 3, "hour": 14, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 4, "hour": 8,  "duration": 2 }]
+    ]
+  },
+  {
+    "code": "CITS3007",
+    "name": "System Programming",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 14, "duration": 2 },
+      { "type": "LAB", "day": 3, "hour": 11, "duration": 2 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "CITS3200",
+    "name": "Professional Computing",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 16, "duration": 2 },
+      { "type": "LAB", "day": 0, "hour": 13, "duration": 2 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "CITS4009",
+    "name": "Introduction to Data Science",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 13, "duration": 2 },
+      { "type": "LAB", "day": 1, "hour": 9,  "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 4, "hour": 15, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "CITS4011",
+    "name": "Artificial Intelligence",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 3, "hour": 13, "duration": 2 },
+      { "type": "TUT", "day": 1, "hour": 11, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 4, "hour": 10, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "CITS4012",
+    "name": "Natural Language Processing",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 14, "duration": 2 },
+      { "type": "LAB", "day": 3, "hour": 16, "duration": 2 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "CITS5501",
+    "name": "Software Testing and Quality Assurance",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 4, "hour": 10, "duration": 2 },
+      { "type": "LAB", "day": 2, "hour": 8,  "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 0, "hour": 10, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "CITS5503",
+    "name": "Cloud Computing",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 16, "duration": 2 },
+      { "type": "LAB", "day": 2, "hour": 10, "duration": 2 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "MATH1001",
+    "name": "Mathematical Methods 1",
+    "cp": 6,
+    "faculty": "Mathematics",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 11, "duration": 1 },
+      { "type": "LEC", "day": 4, "hour": 11, "duration": 1 },
+      { "type": "TUT", "day": 2, "hour": 9,  "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 3, "hour": 14, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "MATH1002",
+    "name": "Mathematical Methods 2",
+    "cp": 6,
+    "faculty": "Mathematics",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 9,  "duration": 1 },
+      { "type": "LEC", "day": 3, "hour": 9,  "duration": 1 },
+      { "type": "TUT", "day": 2, "hour": 13, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 4, "hour": 9,  "duration": 1 }]
+    ]
+  },
+  {
+    "code": "MATH2031",
+    "name": "Linear Algebra",
+    "cp": 6,
+    "faculty": "Mathematics",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 13, "duration": 2 },
+      { "type": "TUT", "day": 2, "hour": 15, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 4, "hour": 13, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "MATH2221",
+    "name": "Advanced Calculus",
+    "cp": 6,
+    "faculty": "Mathematics",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 10, "duration": 2 },
+      { "type": "TUT", "day": 3, "hour": 13, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 4, "hour": 10, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "MATH3022",
+    "name": "Algebra",
+    "cp": 6,
+    "faculty": "Mathematics",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 8,  "duration": 2 },
+      { "type": "TUT", "day": 4, "hour": 15, "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "STAT1400",
+    "name": "Statistics for Science",
+    "cp": 6,
+    "faculty": "Mathematics",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 10, "duration": 2 },
+      { "type": "TUT", "day": 4, "hour": 13, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 1, "hour": 15, "duration": 1 }],
+      [{ "type": "TUT", "day": 3, "hour": 9,  "duration": 1 }]
+    ]
+  },
+  {
+    "code": "STAT2401",
+    "name": "Analysis of Experiments",
+    "cp": 6,
+    "faculty": "Mathematics",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 11, "duration": 2 },
+      { "type": "TUT", "day": 3, "hour": 16, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 0, "hour": 15, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "STAT3062",
+    "name": "Statistical Learning",
+    "cp": 6,
+    "faculty": "Mathematics",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 4, "hour": 9,  "duration": 2 },
+      { "type": "LAB", "day": 2, "hour": 14, "duration": 2 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "PHYS1001",
+    "name": "Physics for Scientists",
+    "cp": 6,
+    "faculty": "Physics",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 10, "duration": 1 },
+      { "type": "LEC", "day": 4, "hour": 10, "duration": 1 },
+      { "type": "LAB", "day": 2, "hour": 15, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 1, "hour": 11, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "PHYS2001",
+    "name": "Modern Physics",
+    "cp": 6,
+    "faculty": "Physics",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 13, "duration": 1 },
+      { "type": "LEC", "day": 3, "hour": 13, "duration": 1 },
+      { "type": "LAB", "day": 0, "hour": 9,  "duration": 3 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 2, "hour": 9,  "duration": 3 }]
+    ]
+  },
+  {
+    "code": "PHYS3002",
+    "name": "Quantum Mechanics",
+    "cp": 6,
+    "faculty": "Physics",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 9,  "duration": 2 },
+      { "type": "TUT", "day": 4, "hour": 11, "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "CHEM1001",
+    "name": "Chemistry: An Introduction",
+    "cp": 6,
+    "faculty": "Chemistry",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 11, "duration": 2 },
+      { "type": "LAB", "day": 3, "hour": 13, "duration": 3 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 4, "hour": 13, "duration": 3 }]
+    ]
+  },
+  {
+    "code": "CHEM2001",
+    "name": "Organic Chemistry",
+    "cp": 6,
+    "faculty": "Chemistry",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 8,  "duration": 2 },
+      { "type": "TUT", "day": 2, "hour": 10, "duration": 1 },
+      { "type": "LAB", "day": 4, "hour": 8,  "duration": 3 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 1, "hour": 13, "duration": 3 }]
+    ]
+  },
+  {
+    "code": "CHEM3001",
+    "name": "Biochemistry",
+    "cp": 6,
+    "faculty": "Chemistry",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 3, "hour": 11, "duration": 2 },
+      { "type": "LAB", "day": 1, "hour": 13, "duration": 3 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "BIOL1130",
+    "name": "Biology of Cells and Organisms",
+    "cp": 6,
+    "faculty": "Biology",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 12, "duration": 2 },
+      { "type": "TUT", "day": 2, "hour": 14, "duration": 1 },
+      { "type": "LAB", "day": 4, "hour": 10, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 3, "hour": 8,  "duration": 2 }]
+    ]
+  },
+  {
+    "code": "BIOL2231",
+    "name": "Genetics and Evolution",
+    "cp": 6,
+    "faculty": "Biology",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 8,  "duration": 2 },
+      { "type": "TUT", "day": 3, "hour": 10, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 0, "hour": 16, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "BIOL3040",
+    "name": "Ecology",
+    "cp": 6,
+    "faculty": "Biology",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 16, "duration": 2 },
+      { "type": "LAB", "day": 0, "hour": 14, "duration": 2 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "ENSC2001",
+    "name": "Engineering Mathematics",
+    "cp": 6,
+    "faculty": "Engineering",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 9,  "duration": 2 },
+      { "type": "TUT", "day": 2, "hour": 11, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 4, "hour": 14, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "MECH2003",
+    "name": "Mechanics of Materials",
+    "cp": 6,
+    "faculty": "Engineering",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 14, "duration": 2 },
+      { "type": "TUT", "day": 3, "hour": 8,  "duration": 1 },
+      { "type": "LAB", "day": 0, "hour": 11, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 4, "hour": 11, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "ELEC2301",
+    "name": "Signals and Systems",
+    "cp": 6,
+    "faculty": "Engineering",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 13, "duration": 2 },
+      { "type": "TUT", "day": 4, "hour": 16, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 1, "hour": 8,  "duration": 1 }]
+    ]
+  },
+  {
+    "code": "CIVL2008",
+    "name": "Fluid Mechanics",
+    "cp": 6,
+    "faculty": "Engineering",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 15, "duration": 2 },
+      { "type": "LAB", "day": 2, "hour": 8,  "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 3, "hour": 15, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "ECON1101",
+    "name": "Microeconomics: Prices and Markets",
+    "cp": 6,
+    "faculty": "Economics",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 16, "duration": 2 },
+      { "type": "TUT", "day": 3, "hour": 11, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 0, "hour": 8,  "duration": 1 }],
+      [{ "type": "TUT", "day": 4, "hour": 12, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "ECON2030",
+    "name": "Intermediate Microeconomics",
+    "cp": 6,
+    "faculty": "Economics",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 3, "hour": 8,  "duration": 2 },
+      { "type": "TUT", "day": 1, "hour": 12, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 4, "hour": 8,  "duration": 1 }]
+    ]
+  },
+  {
+    "code": "ECON3010",
+    "name": "Mathematical Economics",
+    "cp": 6,
+    "faculty": "Economics",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 4, "hour": 13, "duration": 2 },
+      { "type": "TUT", "day": 2, "hour": 16, "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "BUSN1001",
+    "name": "Business and Management",
+    "cp": 6,
+    "faculty": "Business",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 9,  "duration": 2 },
+      { "type": "TUT", "day": 4, "hour": 14, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 1, "hour": 16, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "MGMT2237",
+    "name": "Organisational Behaviour",
+    "cp": 6,
+    "faculty": "Business",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 16, "duration": 2 },
+      { "type": "TUT", "day": 2, "hour": 12, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 3, "hour": 16, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "MKTG2202",
+    "name": "Marketing Management",
+    "cp": 6,
+    "faculty": "Business",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 9,  "duration": 2 },
+      { "type": "TUT", "day": 3, "hour": 12, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 0, "hour": 12, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "FINA2207",
+    "name": "Corporate Finance",
+    "cp": 6,
+    "faculty": "Business",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 4, "hour": 11, "duration": 2 },
+      { "type": "TUT", "day": 2, "hour": 16, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 0, "hour": 14, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "ENGL1101",
+    "name": "Reading and Writing Practices",
+    "cp": 6,
+    "faculty": "Arts",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 3, "hour": 10, "duration": 1 },
+      { "type": "TUT", "day": 4, "hour": 9,  "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "HIST2215",
+    "name": "Modern World History",
+    "cp": 6,
+    "faculty": "Arts",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 11, "duration": 2 },
+      { "type": "TUT", "day": 0, "hour": 9,  "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 3, "hour": 14, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "PHIL1001",
+    "name": "Critical Thinking",
+    "cp": 6,
+    "faculty": "Arts",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 4, "hour": 8,  "duration": 2 },
+      { "type": "TUT", "day": 1, "hour": 13, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 3, "hour": 15, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "ARTH2201",
+    "name": "History of Modern Art",
+    "cp": 6,
+    "faculty": "Arts",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 10, "duration": 2 },
+      { "type": "TUT", "day": 3, "hour": 8,  "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "LAWS1101",
+    "name": "Law and Society",
+    "cp": 6,
+    "faculty": "Law",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 9,  "duration": 2 },
+      { "type": "TUT", "day": 3, "hour": 15, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 4, "hour": 11, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "LAWS2101",
+    "name": "Contract Law",
+    "cp": 6,
+    "faculty": "Law",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 14, "duration": 2 },
+      { "type": "TUT", "day": 0, "hour": 11, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 4, "hour": 16, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "LAWS3104",
+    "name": "Administrative Law",
+    "cp": 6,
+    "faculty": "Law",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 3, "hour": 16, "duration": 2 },
+      { "type": "TUT", "day": 1, "hour": 10, "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "PSYC1101",
+    "name": "Psychology: Mind and Brain",
+    "cp": 6,
+    "faculty": "Psychology",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 13, "duration": 2 },
+      { "type": "TUT", "day": 2, "hour": 11, "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "PSYC2201",
+    "name": "Research Methods in Psychology",
+    "cp": 6,
+    "faculty": "Psychology",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 4, "hour": 14, "duration": 2 },
+      { "type": "LAB", "day": 1, "hour": 15, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 2, "hour": 8,  "duration": 2 }]
+    ]
+  },
+  {
+    "code": "PSYC3302",
+    "name": "Cognitive Psychology",
+    "cp": 6,
+    "faculty": "Psychology",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 3, "hour": 9,  "duration": 2 },
+      { "type": "TUT", "day": 1, "hour": 16, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 0, "hour": 14, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "ANHB2212",
+    "name": "Human Anatomy",
+    "cp": 6,
+    "faculty": "Health Sciences",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 8,  "duration": 2 },
+      { "type": "TUT", "day": 2, "hour": 13, "duration": 1 },
+      { "type": "LAB", "day": 4, "hour": 13, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 1, "hour": 8,  "duration": 2 }]
+    ]
+  },
+  {
+    "code": "PUBH1101",
+    "name": "Introduction to Public Health",
+    "cp": 6,
+    "faculty": "Health Sciences",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 12, "duration": 2 },
+      { "type": "TUT", "day": 4, "hour": 15, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 3, "hour": 13, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "ENVT1501",
+    "name": "Introduction to Environmental Science",
+    "cp": 6,
+    "faculty": "Environmental Science",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 15, "duration": 2 },
+      { "type": "LAB", "day": 0, "hour": 8,  "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 3, "hour": 12, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "ENVT3302",
+    "name": "Climate Change Science",
+    "cp": 6,
+    "faculty": "Environmental Science",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 4, "hour": 16, "duration": 2 },
+      { "type": "TUT", "day": 2, "hour": 9,  "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "CITS2002",
+    "name": "Systems Programming",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 12, "duration": 2 },
+      { "type": "LAB", "day": 2, "hour": 13, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 4, "hour": 13, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "CITS2211",
+    "name": "Discrete Structures",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 11, "duration": 2 },
+      { "type": "TUT", "day": 3, "hour": 10, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 0, "hour": 12, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "CITS2406",
+    "name": "Networking and Security",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 3, "hour": 14, "duration": 2 },
+      { "type": "LAB", "day": 1, "hour": 8,  "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 4, "hour": 10, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "CITS3011",
+    "name": "Intelligent Agents",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 10, "duration": 2 },
+      { "type": "LAB", "day": 2, "hour": 16, "duration": 2 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "CITS4406",
+    "name": "Ethical Hacking",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 4, "hour": 8,  "duration": 2 },
+      { "type": "LAB", "day": 2, "hour": 11, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 0, "hour": 15, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "CITS5505",
+    "name": "Agile Web Development",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 15, "duration": 2 },
+      { "type": "LAB", "day": 3, "hour": 8,  "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 0, "hour": 9,  "duration": 2 }]
+    ]
+  },
+  {
+    "code": "CITS5506",
+    "name": "Internet of Things",
+    "cp": 6,
+    "faculty": "CSSE",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 8,  "duration": 2 },
+      { "type": "LAB", "day": 4, "hour": 12, "duration": 2 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "MATH1003",
+    "name": "Calculus",
+    "cp": 6,
+    "faculty": "Mathematics",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 9,  "duration": 1 },
+      { "type": "LEC", "day": 2, "hour": 9,  "duration": 1 },
+      { "type": "TUT", "day": 4, "hour": 12, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 1, "hour": 14, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "MATH2032",
+    "name": "Real Analysis",
+    "cp": 6,
+    "faculty": "Mathematics",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 8,  "duration": 2 },
+      { "type": "TUT", "day": 3, "hour": 15, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 0, "hour": 11, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "MATH3011",
+    "name": "Complex Analysis",
+    "cp": 6,
+    "faculty": "Mathematics",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 14, "duration": 2 },
+      { "type": "TUT", "day": 4, "hour": 9,  "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "MATH3044",
+    "name": "Number Theory",
+    "cp": 6,
+    "faculty": "Mathematics",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 3, "hour": 12, "duration": 2 },
+      { "type": "TUT", "day": 1, "hour": 16, "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "STAT2062",
+    "name": "Applied Statistics",
+    "cp": 6,
+    "faculty": "Mathematics",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 14, "duration": 2 },
+      { "type": "LAB", "day": 2, "hour": 10, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 4, "hour": 14, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "PHYS1002",
+    "name": "Electromagnetism",
+    "cp": 6,
+    "faculty": "Physics",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 11, "duration": 1 },
+      { "type": "LEC", "day": 2, "hour": 11, "duration": 1 },
+      { "type": "LAB", "day": 4, "hour": 11, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 1, "hour": 14, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "PHYS2002",
+    "name": "Thermal Physics",
+    "cp": 6,
+    "faculty": "Physics",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 3, "hour": 10, "duration": 2 },
+      { "type": "TUT", "day": 1, "hour": 12, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 0, "hour": 16, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "PHYS3003",
+    "name": "Electrodynamics",
+    "cp": 6,
+    "faculty": "Physics",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 15, "duration": 2 },
+      { "type": "TUT", "day": 4, "hour": 13, "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "PHYS4040",
+    "name": "Astrophysics",
+    "cp": 6,
+    "faculty": "Physics",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 10, "duration": 2 },
+      { "type": "TUT", "day": 3, "hour": 8,  "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "CHEM1002",
+    "name": "Physical Chemistry",
+    "cp": 6,
+    "faculty": "Chemistry",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 13, "duration": 2 },
+      { "type": "LAB", "day": 2, "hour": 11, "duration": 3 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 4, "hour": 9,  "duration": 3 }]
+    ]
+  },
+  {
+    "code": "CHEM2002",
+    "name": "Inorganic Chemistry",
+    "cp": 6,
+    "faculty": "Chemistry",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 13, "duration": 2 },
+      { "type": "TUT", "day": 3, "hour": 11, "duration": 1 },
+      { "type": "LAB", "day": 0, "hour": 10, "duration": 3 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 2, "hour": 13, "duration": 3 }]
+    ]
+  },
+  {
+    "code": "CHEM3002",
+    "name": "Analytical Chemistry",
+    "cp": 6,
+    "faculty": "Chemistry",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 4, "hour": 14, "duration": 2 },
+      { "type": "LAB", "day": 1, "hour": 9,  "duration": 3 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "BIOL1131",
+    "name": "Plant Biology",
+    "cp": 6,
+    "faculty": "Biology",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 10, "duration": 2 },
+      { "type": "TUT", "day": 4, "hour": 8,  "duration": 1 },
+      { "type": "LAB", "day": 0, "hour": 11, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 3, "hour": 9,  "duration": 2 }]
+    ]
+  },
+  {
+    "code": "BIOL2232",
+    "name": "Cell Biology",
+    "cp": 6,
+    "faculty": "Biology",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 14, "duration": 2 },
+      { "type": "LAB", "day": 3, "hour": 13, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 0, "hour": 8,  "duration": 2 }]
+    ]
+  },
+  {
+    "code": "BIOL3041",
+    "name": "Microbiology",
+    "cp": 6,
+    "faculty": "Biology",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 15, "duration": 2 },
+      { "type": "LAB", "day": 2, "hour": 8,  "duration": 3 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 4, "hour": 8,  "duration": 3 }]
+    ]
+  },
+  {
+    "code": "BIOL3042",
+    "name": "Marine Biology",
+    "cp": 6,
+    "faculty": "Biology",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 3, "hour": 16, "duration": 2 },
+      { "type": "LAB", "day": 1, "hour": 11, "duration": 3 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "ENSC3001",
+    "name": "Thermodynamics",
+    "cp": 6,
+    "faculty": "Engineering",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 12, "duration": 2 },
+      { "type": "TUT", "day": 4, "hour": 11, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 0, "hour": 14, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "MECH3001",
+    "name": "Machine Design",
+    "cp": 6,
+    "faculty": "Engineering",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 9,  "duration": 2 },
+      { "type": "TUT", "day": 3, "hour": 14, "duration": 1 },
+      { "type": "LAB", "day": 0, "hour": 13, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 4, "hour": 15, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "ELEC3302",
+    "name": "Digital Systems",
+    "cp": 6,
+    "faculty": "Engineering",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 4, "hour": 9,  "duration": 2 },
+      { "type": "LAB", "day": 2, "hour": 15, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 0, "hour": 15, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "CIVL3009",
+    "name": "Structural Analysis",
+    "cp": 6,
+    "faculty": "Engineering",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 3, "hour": 11, "duration": 2 },
+      { "type": "TUT", "day": 1, "hour": 13, "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "ENSC4001",
+    "name": "Control Systems",
+    "cp": 6,
+    "faculty": "Engineering",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 16, "duration": 2 },
+      { "type": "LAB", "day": 3, "hour": 10, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 1, "hour": 10, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "ECON1102",
+    "name": "Macroeconomics",
+    "cp": 6,
+    "faculty": "Economics",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 12, "duration": 2 },
+      { "type": "TUT", "day": 4, "hour": 10, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 0, "hour": 13, "duration": 1 }],
+      [{ "type": "TUT", "day": 3, "hour": 9,  "duration": 1 }]
+    ]
+  },
+  {
+    "code": "ECON2031",
+    "name": "Econometrics",
+    "cp": 6,
+    "faculty": "Economics",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 8,  "duration": 2 },
+      { "type": "TUT", "day": 3, "hour": 12, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 4, "hour": 16, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "ECON3011",
+    "name": "International Trade",
+    "cp": 6,
+    "faculty": "Economics",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 4, "hour": 15, "duration": 2 },
+      { "type": "TUT", "day": 2, "hour": 8,  "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "ECON4010",
+    "name": "Behavioural Economics",
+    "cp": 6,
+    "faculty": "Economics",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 11, "duration": 2 },
+      { "type": "TUT", "day": 2, "hour": 16, "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "ACCT1101",
+    "name": "Financial Accounting",
+    "cp": 6,
+    "faculty": "Business",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 3, "hour": 9,  "duration": 2 },
+      { "type": "TUT", "day": 1, "hour": 11, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 4, "hour": 13, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "ACCT2202",
+    "name": "Management Accounting",
+    "cp": 6,
+    "faculty": "Business",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 14, "duration": 2 },
+      { "type": "TUT", "day": 0, "hour": 10, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 4, "hour": 9,  "duration": 1 }]
+    ]
+  },
+  {
+    "code": "MGMT3338",
+    "name": "Strategic Management",
+    "cp": 6,
+    "faculty": "Business",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 16, "duration": 2 },
+      { "type": "TUT", "day": 3, "hour": 13, "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "IBUS2201",
+    "name": "International Business",
+    "cp": 6,
+    "faculty": "Business",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 4, "hour": 12, "duration": 2 },
+      { "type": "TUT", "day": 2, "hour": 9,  "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 0, "hour": 15, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "ENGL2202",
+    "name": "Creative Writing",
+    "cp": 6,
+    "faculty": "Arts",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 14, "duration": 1 },
+      { "type": "TUT", "day": 3, "hour": 16, "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "PHIL2002",
+    "name": "Ethics",
+    "cp": 6,
+    "faculty": "Arts",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 13, "duration": 2 },
+      { "type": "TUT", "day": 0, "hour": 9,  "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 4, "hour": 11, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "SOCI1101",
+    "name": "Introduction to Sociology",
+    "cp": 6,
+    "faculty": "Arts",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 10, "duration": 2 },
+      { "type": "TUT", "day": 3, "hour": 14, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 0, "hour": 12, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "GEOG1101",
+    "name": "Human Geography",
+    "cp": 6,
+    "faculty": "Arts",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 4, "hour": 13, "duration": 2 },
+      { "type": "TUT", "day": 2, "hour": 11, "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "MUSI1001",
+    "name": "Introduction to Music Theory",
+    "cp": 6,
+    "faculty": "Arts",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 3, "hour": 8,  "duration": 2 },
+      { "type": "TUT", "day": 1, "hour": 14, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 4, "hour": 8,  "duration": 1 }]
+    ]
+  },
+  {
+    "code": "LAWS2102",
+    "name": "Tort Law",
+    "cp": 6,
+    "faculty": "Law",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 9,  "duration": 2 },
+      { "type": "TUT", "day": 2, "hour": 15, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 4, "hour": 14, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "LAWS3105",
+    "name": "Corporate Law",
+    "cp": 6,
+    "faculty": "Law",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 9,  "duration": 2 },
+      { "type": "TUT", "day": 4, "hour": 16, "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "LAWS4201",
+    "name": "International Law",
+    "cp": 6,
+    "faculty": "Law",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 15, "duration": 2 },
+      { "type": "TUT", "day": 3, "hour": 9,  "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "PSYC1102",
+    "name": "Social Psychology",
+    "cp": 6,
+    "faculty": "Psychology",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 4, "hour": 10, "duration": 2 },
+      { "type": "TUT", "day": 2, "hour": 14, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 0, "hour": 16, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "PSYC2202",
+    "name": "Developmental Psychology",
+    "cp": 6,
+    "faculty": "Psychology",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 3, "hour": 13, "duration": 2 },
+      { "type": "TUT", "day": 1, "hour": 9,  "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "PSYC3303",
+    "name": "Clinical Psychology",
+    "cp": 6,
+    "faculty": "Psychology",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 11, "duration": 2 },
+      { "type": "TUT", "day": 4, "hour": 15, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 2, "hour": 12, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "NURS1101",
+    "name": "Foundations of Nursing",
+    "cp": 6,
+    "faculty": "Health Sciences",
+    "sems": ["S1", "S2"],
+    "sessions": [
+      { "type": "LEC", "day": 1, "hour": 8,  "duration": 2 },
+      { "type": "LAB", "day": 3, "hour": 14, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 0, "hour": 14, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "NURS2201",
+    "name": "Pharmacology",
+    "cp": 6,
+    "faculty": "Health Sciences",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 16, "duration": 2 },
+      { "type": "TUT", "day": 4, "hour": 9,  "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "PUBH2201",
+    "name": "Epidemiology",
+    "cp": 6,
+    "faculty": "Health Sciences",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 3, "hour": 10, "duration": 2 },
+      { "type": "TUT", "day": 1, "hour": 13, "duration": 1 }
+    ],
+    "alternatives": [
+      [{ "type": "TUT", "day": 4, "hour": 12, "duration": 1 }]
+    ]
+  },
+  {
+    "code": "ENVT2201",
+    "name": "Ecosystem Science",
+    "cp": 6,
+    "faculty": "Environmental Science",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 0, "hour": 10, "duration": 2 },
+      { "type": "LAB", "day": 2, "hour": 13, "duration": 2 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 4, "hour": 13, "duration": 2 }]
+    ]
+  },
+  {
+    "code": "ENVT3303",
+    "name": "Environmental Policy",
+    "cp": 6,
+    "faculty": "Environmental Science",
+    "sems": ["S1"],
+    "sessions": [
+      { "type": "LEC", "day": 4, "hour": 11, "duration": 2 },
+      { "type": "TUT", "day": 1, "hour": 15, "duration": 1 }
+    ],
+    "alternatives": []
+  },
+  {
+    "code": "MARS1001",
+    "name": "Marine Science",
+    "cp": 6,
+    "faculty": "Environmental Science",
+    "sems": ["S2"],
+    "sessions": [
+      { "type": "LEC", "day": 2, "hour": 8,  "duration": 2 },
+      { "type": "LAB", "day": 0, "hour": 12, "duration": 3 }
+    ],
+    "alternatives": [
+      [{ "type": "LAB", "day": 3, "hour": 8,  "duration": 3 }]
+    ]
+  }
+]

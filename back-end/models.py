@@ -10,6 +10,7 @@ friendships      — accepted friend pairs (bidirectional)
 friend_requests  — pending / declined requests
 """
 
+import json
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -29,10 +30,10 @@ class User(db.Model):
     password_hash  = db.Column(db.String(256), nullable=False)
     created_at     = db.Column(db.DateTime,    default=datetime.utcnow)
 
-    # one-to-one timetable
-    timetable = db.relationship(
+    # one-to-many timetables
+    timetables = db.relationship(
         'Timetable', back_populates='user',
-        uselist=False, cascade='all, delete-orphan'
+        cascade='all, delete-orphan'
     )
     # friend requests sent / received
     sent_requests = db.relationship(
@@ -71,18 +72,27 @@ class Timetable(db.Model):
     __tablename__ = 'timetables'
 
     id         = db.Column(db.Integer,    primary_key=True)
-    user_id    = db.Column(db.Integer,    db.ForeignKey('users.id'), nullable=False, unique=True)
+    user_id    = db.Column(db.Integer,    db.ForeignKey('users.id'), nullable=False)
     name       = db.Column(db.String(100), default='My Timetable')
     semester   = db.Column(db.String(4),   default='S1')   # S1 | S2 | SUM
     is_public  = db.Column(db.Boolean,     default=False)
     updated_at = db.Column(db.DateTime,    default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    user    = db.relationship('User', back_populates='timetable')
+    user    = db.relationship('User', back_populates='timetables')
     entries = db.relationship(
         'TimetableEntry', back_populates='timetable',
         cascade='all, delete-orphan',
         order_by='TimetableEntry.position'
     )
+
+    def to_summary(self) -> dict:
+        return {
+            'id':        self.id,
+            'name':      self.name,
+            'semester':  self.semester,
+            'isPublic':  self.is_public,
+            'updatedAt': self.updated_at.isoformat() + 'Z' if self.updated_at else None,
+        }
 
     def to_dict(self) -> dict:
         return {
@@ -92,7 +102,7 @@ class Timetable(db.Model):
             'semester':  self.semester,
             'isPublic':  self.is_public,
             'selected':  [e.to_dict() for e in self.entries],
-            'updatedAt': self.updated_at.isoformat() + 'Z',
+            'updatedAt': self.updated_at.isoformat() + 'Z' if self.updated_at else None,
         }
 
 
@@ -136,6 +146,35 @@ class Friendship(db.Model):
             Friendship(user_id=user_id,   friend_id=friend_id),
             Friendship(user_id=friend_id, friend_id=user_id),
         ]
+
+
+# ── CustomCourse ──────────────────────────────────────────────────────
+class CustomCourse(db.Model):
+    __tablename__ = 'custom_courses'
+
+    id       = db.Column(db.Integer,     primary_key=True)
+    user_id  = db.Column(db.Integer,     db.ForeignKey('users.id'), nullable=False)
+    code     = db.Column(db.String(20),  nullable=False)
+    name     = db.Column(db.String(200), nullable=False)
+    cp       = db.Column(db.Integer,     default=0)
+    sems     = db.Column(db.Text,        nullable=False, default='["S1"]')
+    sessions = db.Column(db.Text,        nullable=False, default='[]')
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'code', name='uq_user_custom_course'),
+    )
+
+    def to_dict(self) -> dict:
+        return {
+            'code':         self.code,
+            'name':         self.name,
+            'cp':           self.cp,
+            'faculty':      'Custom',
+            'sems':         json.loads(self.sems),
+            'sessions':     json.loads(self.sessions),
+            'alternatives': [],
+            'custom':       True,
+        }
 
 
 # ── FriendRequest ─────────────────────────────────────────────────────

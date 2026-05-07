@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Browse Units — UWA Planner{% endblock %}
+{% block body %}
+
+  <!-- Nav injected by js/utils/components.js -->
+
+  <!-- ── Page shell ── -->
+  <div class="max-w-[1160px] mx-auto px-6 pt-[90px] pb-10 page-enter">
+
+    <div class="mb-7">
+      <h1 class="font-display text-[28px] font-extrabold text-[var(--text)] mb-1">Browse Units</h1>
+      <p class="text-[14px] text-[var(--text2)]">Search and add units to your semester plan. Click + to add to your selection.</p>
+    </div>
+
+    <div id="coursesLayout" class="grid gap-5 items-start grid-cols-1 lg:grid-cols-[1fr_340px]">
+
+      <!-- ── Left: filter + table ── -->
+      <div>
+        <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-xl overflow-hidden">
+
+          <!-- Filters -->
+          <div class="flex gap-2 flex-wrap items-center px-5 py-4 border-b border-[var(--border)]">
+            <button class="filter-chip on" data-sem="S1">Sem 1</button>
+            <button class="filter-chip on" data-sem="S2">Sem 2</button>
+            <span class="flex-1"></span>
+            <span class="font-mono text-[11px] text-[var(--text3)]" id="tableCount">— units</span>
+          </div>
+
+          <!-- Search -->
+          <div class="px-5 py-[14px] border-b border-[var(--border)]">
+            <div class="relative">
+              <svg class="absolute left-[10px] top-1/2 -translate-y-1/2 text-[var(--text3)] pointer-events-none" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="6.5" cy="6.5" r="4.5"/><path d="m9.5 9.5 3.5 3.5"/>
+              </svg>
+              <input
+                class="w-full py-[9px] pr-3 pl-9 bg-[var(--bg3)] border border-[var(--border)] rounded text-[var(--text)] text-[13px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)]"
+                type="text" id="unitSearch" placeholder="Search by code, name, or faculty…">
+            </div>
+          </div>
+
+          <!-- Table — row styles handled by course-table in custom.css -->
+          <table class="course-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Unit name</th>
+                <th>Sem</th>
+                <th>Sessions</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="courseTableBody">
+              <tr><td colspan="5" class="text-center py-8 text-[var(--text3)] italic">Loading units…</td></tr>
+            </tbody>
+          </table>
+
+          <!-- Pagination footer -->
+          <div class="px-4 py-2.5 border-t border-[var(--border)] bg-[var(--bg3)] flex items-center justify-between">
+            <span class="font-mono text-[11px] text-[var(--text3)]" id="tableCountFooter">—</span>
+            <div class="flex gap-1" id="pagination"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Right: basket + manual ── -->
+      <div>
+
+        <!-- Basket -->
+        <div id="basketCard" class="bg-[var(--bg2)] border border-[var(--border)] rounded-xl overflow-hidden mb-[14px]">
+          <div class="px-5 py-4 border-b border-[var(--border)] flex items-center gap-3">
+            <div class="font-display text-[15px] font-bold text-[var(--text)] flex-shrink-0">My selection</div>
+            <!-- Timetable picker -->
+            <div class="relative flex-1 min-w-0" id="ttSelectorWrap">
+              <button type="button" id="ttSelectorBtn"
+                class="flex items-center gap-1.5 w-full max-w-[160px] py-[5px] px-[9px] rounded bg-[var(--bg3)] border border-[var(--border2)] text-[var(--text2)] text-[11px] font-mono cursor-pointer hover:border-[var(--border3)] hover:text-[var(--text)] transition-colors">
+                <span class="flex-1 min-w-0 truncate text-left" id="ttSelectorLabel">My Timetable</span>
+                <svg class="flex-shrink-0" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m2 3.5 3 3 3-3"/></svg>
+              </button>
+              <div id="ttDropdown" class="absolute top-full left-0 mt-1 min-w-[180px] bg-[var(--bg2)] border border-[var(--border2)] rounded-lg z-50 py-1 hidden" style="box-shadow:0 8px 24px var(--shadow-lg)">
+                <div id="ttDropdownItems"></div>
+                <div class="border-t border-[var(--border)] mt-1 pt-1">
+                  <button type="button" id="ttNewBtn"
+                    class="w-full text-left px-3 py-[7px] text-[11px] font-mono text-[var(--accent)] hover:bg-[var(--accent-glow)] transition-colors cursor-pointer bg-transparent border-0">
+                    + New timetable
+                  </button>
+                </div>
+              </div>
+            </div>
+            <a class="btn btn-sm btn-ghost flex-shrink-0" href="/schedule">View →</a>
+          </div>
+          <div id="basketBody">
+            <div class="p-8 text-center text-[var(--text3)] text-[13px] italic">Add units from the table</div>
+          </div>
+          <div class="px-4 py-[14px] border-t border-[var(--border)] bg-[var(--bg3)]" id="basketFooter" style="display:none">
+            <a class="btn btn-primary btn-full" href="/schedule">Generate schedule →</a>
+          </div>
+        </div>
+
+        <!-- Manual add -->
+        <div id="manualCard" class="bg-[var(--bg2)] border border-[var(--border)] rounded-xl overflow-hidden">
+          <div class="px-5 py-4 border-b border-[var(--border)] flex items-center justify-between">
+            <div class="font-display text-[15px] font-bold text-[var(--text)]">Add manually</div>
+          </div>
+          <div class="p-5">
+            <div class="mb-3">
+              <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]">Unit code</label>
+              <input
+                class="w-full py-2.5 px-[14px] bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text)] text-[14px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)] uppercase"
+                type="text" id="manualCode" placeholder="e.g. CITS3001">
+            </div>
+            <div class="mb-3">
+              <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]">Unit name</label>
+              <input
+                class="w-full py-2.5 px-[14px] bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text)] text-[13px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)]"
+                type="text" id="manualName" placeholder="e.g. Introduction to Robotics">
+            </div>
+            <div class="mb-3">
+              <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]">Semester</label>
+              <div class="flex gap-1.5">
+                <button class="sem-btn on" data-sem="S1">Sem 1</button>
+                <button class="sem-btn" data-sem="S2">Sem 2</button>
+              </div>
+            </div>
+            <div class="mb-4">
+              <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]">Sessions</label>
+              <div id="sessionList" class="flex flex-col gap-1.5 mb-2">
+                <div class="session-row flex gap-1 items-center">
+                  <select class="sess-type sess-input">
+                    <option>LEC</option><option>TUT</option><option>LAB</option>
+                  </select>
+                  <select class="sess-day sess-input">
+                    <option value="0">Mon</option><option value="1">Tue</option>
+                    <option value="2">Wed</option><option value="3">Thu</option>
+                    <option value="4">Fri</option>
+                  </select>
+                  <input type="number" class="sess-start sess-input sess-num" min="8" max="19" value="9" title="Start hour">
+                  <span class="sess-sep">–</span>
+                  <input type="number" class="sess-end sess-input sess-num" min="9" max="20" value="11" title="End hour">
+                </div>
+              </div>
+              <button type="button" id="addSessionBtn" class="text-[11px] text-[var(--accent)] font-medium bg-transparent border-0 cursor-pointer hover:underline p-0 leading-none">+ Add session</button>
+            </div>
+            <button class="btn btn-primary btn-full mb-3" id="addManualBtn">Add unit</button>
+            <p class="text-[11px] text-[var(--text3)] leading-[1.5]">Can't find your unit? Add it manually with custom session times.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- New timetable modal -->
+  <div class="overlay fixed inset-0 z-[100] flex items-center justify-center" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px)" id="newTtModal">
+    <div class="modal bg-[var(--bg2)] border border-[var(--border2)] rounded-xl w-[400px] max-w-[95vw] p-6" style="box-shadow:0 32px 80px var(--shadow-lg)">
+      <div class="font-display text-[17px] font-bold text-[var(--text)] mb-5">New timetable</div>
+      <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]">Name</label>
+      <input
+        class="w-full py-2.5 px-[14px] bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text)] text-[14px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)] mb-5"
+        type="text" id="newTtName" placeholder="e.g. Semester 1 Plan" maxlength="40">
+      <div class="flex gap-2 justify-end">
+        <button class="btn" id="cancelNewTtBtn">Cancel</button>
+        <button class="btn btn-primary" id="confirmNewTtBtn">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/static/js/courses.js"></script>
+{% endblock %}
