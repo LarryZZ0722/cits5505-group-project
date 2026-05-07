@@ -77,13 +77,16 @@ async function loadTimetable() {
 
 async function saveSelected() {
   updateNavBadge(selected.length);
+
   const id = State.getActiveTimetableId();
-  if (!id) return;
+  if (!id) return true;
+
   try {
     await API.updateTimetable(id, { selected });
+    return true;
   } catch (e) {
     console.error("updateTimetable failed:", e);
-    toast(e.message || "Could not save selection", "error");
+    return false;
   }
 }
 
@@ -282,24 +285,68 @@ function renderPagination(total) {
 }
 
 /* ── Toggle course in/out of selection ───── */
-function toggleCourse(code) {
-  if (!State.getUser()) { window.location.href = "/auth"; return; }
+/* ── Toggle course in/out of selection ───── */
+async function toggleCourse(code) {
+  if (!State.getUser()) {
+    window.location.href = "/auth";
+    return;
+  }
+
+  const previousSelected = [...selected];
+  const previousCourses = [...allCourses];
+
   const wasAdded = selected.some(x => x.code === code);
+
   if (wasAdded) {
     selected = selected.filter(x => x.code !== code);
+
     const course = allCourses.find(c => c.code === code);
     if (course?.custom) {
       allCourses = allCourses.filter(c => c.code !== code);
-      API.deleteCustomCourse(code);
     }
-    toast(`${code} removed`);
   } else {
     selected = [...selected, { code, altIdx: 0 }];
-    toast(`${code} added`, "success");
   }
+
   patchTableRow(code, !wasAdded);
   renderBasket();
-  saveSelected();
+
+  const saved = await saveSelected();
+
+  if (!saved) {
+    selected = previousSelected;
+    allCourses = previousCourses;
+
+    patchTableRow(code, wasAdded);
+    renderBasket();
+    updateNavBadge(selected.length);
+
+    toast(
+      wasAdded
+        ? `Could not remove ${code}. Please check your connection and try again.`
+        : `Could not add ${code}. Please check your connection and try again.`,
+      "error"
+    );
+
+    return;
+  }
+
+  if (wasAdded) {
+    const course = previousCourses.find(c => c.code === code);
+
+    if (course?.custom) {
+      try {
+        await API.deleteCustomCourse(code);
+      } catch (e) {
+        console.error("deleteCustomCourse failed:", e);
+        toast(`Removed ${code}, but could not delete the custom unit`, "error");
+      }
+    }
+
+    toast(`${code} removed`);
+  } else {
+    toast(`${code} added`, "success");
+  }
 }
 
 function patchTableRow(code, isAdded) {
