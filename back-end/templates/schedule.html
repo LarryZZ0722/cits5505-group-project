@@ -12,8 +12,12 @@
         <h1 class="font-display text-[28px] font-extrabold text-[var(--text)] mb-1">My Schedule</h1>
         <p class="text-[14px] text-[var(--text2)]">Manage your timetables, arrange units and resolve conflicts.</p>
       </div>
-      <div class="flex gap-2 flex-shrink-0">
+      <div class="flex gap-2 flex-shrink-0 flex-wrap">
         <a class="btn" href="/courses">+ Add units</a>
+        <button class="btn" id="statsBtn">📊 Stats</button>
+        <button class="btn" id="compareBtn">⚖ Compare</button>
+        <button class="btn" id="exportBtn">📄 Export</button>
+        <button class="btn" id="conflictsBtn">⚠️ Conflicts</button>
         <button class="btn btn-green" id="autoBtn">⚡ Auto-schedule</button>
       </div>
     </div>
@@ -141,7 +145,7 @@
 
   </div>
 
-  <!-- New timetable modal -->
+  <!-- ── New timetable modal ── -->
   <div class="overlay fixed inset-0 z-[100] flex items-center justify-center" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px)" id="newTtModal">
     <div class="modal bg-[var(--bg2)] border border-[var(--border2)] rounded-xl w-[400px] max-w-[95vw] p-6" style="box-shadow:0 32px 80px var(--shadow-lg)">
       <div class="font-display text-[17px] font-bold text-[var(--text)] mb-5">New timetable</div>
@@ -156,5 +160,69 @@
     </div>
   </div>
 
+  <!-- ── Stats modal ── -->
+  <div class="fixed inset-0 z-[100] flex items-center justify-center" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);display:none" id="statsModal">
+    <div class="modal bg-[var(--bg2)] border border-[var(--border2)] rounded-xl w-[480px] max-w-[95vw] p-6" style="box-shadow:0 32px 80px var(--shadow-lg)">
+      <div class="flex items-center justify-between mb-5">
+        <div class="font-display text-[17px] font-bold text-[var(--text)]">Timetable Stats</div>
+        <button id="closeStatsBtn" class="text-[var(--text3)] hover:text-[var(--text)] bg-transparent border-0 cursor-pointer text-[18px] leading-none">×</button>
+      </div>
+      <div id="statsContent">
+        <div class="text-[13px] text-[var(--text3)] italic">Loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Compare modal ── -->
+  <div class="fixed inset-0 z-[100] flex items-center justify-center" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);display:none" id="compareModal">
+    <div class="modal bg-[var(--bg2)] border border-[var(--border2)] rounded-xl w-[560px] max-w-[95vw] p-6" style="box-shadow:0 32px 80px var(--shadow-lg);max-height:85vh;overflow-y:auto">
+      <div class="flex items-center justify-between mb-5">
+        <div class="font-display text-[17px] font-bold text-[var(--text)]">Compare Timetables</div>
+        <button id="closeCompareBtn" class="text-[var(--text3)] hover:text-[var(--text)] bg-transparent border-0 cursor-pointer text-[18px] leading-none">×</button>
+      </div>
+      <div class="mb-4">
+        <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]">Compare with</label>
+        <select id="compareSelect"
+          class="w-full py-2.5 px-[14px] bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text)] text-[13px] outline-none transition-colors focus:border-[var(--accent)]">
+          <option value="">Select a timetable…</option>
+        </select>
+      </div>
+      <button class="btn btn-primary mb-5" id="runCompareBtn">Compare</button>
+      <div id="compareContent"></div>
+    </div>
+  </div>
+
+  <!-- ── Export modal ── -->
+  <div class="fixed inset-0 z-[100] flex items-center justify-center" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);display:none" id="exportModal">
+    <div class="modal bg-[var(--bg2)] border border-[var(--border2)] rounded-xl w-[560px] max-w-[95vw] p-6" style="box-shadow:0 32px 80px var(--shadow-lg);max-height:85vh;overflow-y:auto">
+      <div class="flex items-center justify-between mb-5">
+        <div class="font-display text-[17px] font-bold text-[var(--text)]">Export Timetable</div>
+        <button id="closeExportBtn" class="text-[var(--text3)] hover:text-[var(--text)] bg-transparent border-0 cursor-pointer text-[18px] leading-none">×</button>
+      </div>
+      <div class="flex gap-2 mb-4">
+        <button class="btn btn-primary" id="copyExportBtn">📋 Copy to clipboard</button>
+        <button class="btn" id="downloadExportBtn">⬇ Download .txt</button>
+      </div>
+      <pre id="exportContent" class="bg-[var(--bg3)] border border-[var(--border)] rounded-lg p-4 text-[12px] font-mono text-[var(--text)] whitespace-pre-wrap overflow-auto max-h-[60vh]">Loading…</pre>
+    </div>
+  </div>
+
+  <!-- ── Conflicts modal ── -->
+  <div class="fixed inset-0 z-[100] flex items-center justify-center" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);display:none" id="conflictsModal">
+    <div class="modal bg-[var(--bg2)] border border-[var(--border2)] rounded-xl w-[560px] max-w-[95vw] p-6" style="box-shadow:0 32px 80px var(--shadow-lg);max-height:85vh;overflow-y:auto">
+      <div class="flex items-center justify-between mb-5">
+        <div class="font-display text-[17px] font-bold text-[var(--text)]">Conflicts</div>
+        <button id="closeConflictsBtn" class="text-[var(--text3)] hover:text-[var(--text)] bg-transparent border-0 cursor-pointer text-[18px] leading-none">×</button>
+      </div>
+      <div id="conflictsContent">
+        <div class="text-[13px] text-[var(--text3)] italic">Loading…</div>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="/static/js/schedule.js"></script>
+  <script type="module" src="/static/js/timetable-stats.js"></script>
+  <script type="module" src="/static/js/timetable-compare.js"></script>
+  <script type="module" src="/static/js/timetable-export.js"></script>
+  <script type="module" src="/static/js/timetable-conflicts.js"></script>
 {% endblock %}
