@@ -3,15 +3,23 @@ import State from './utils/state.js';
 
 const modal    = document.getElementById('conflictsModal');
 const content  = document.getElementById('conflictsContent');
-const openBtn  = document.getElementById('conflictsBtn');
 const closeBtn = document.getElementById('closeConflictsBtn');
 
 function open()  { modal.style.display = 'flex'; loadConflicts(); }
 function close() { modal.style.display = 'none'; }
 
-openBtn?.addEventListener('click', open);
 closeBtn?.addEventListener('click', close);
 modal?.addEventListener('click', e => { if (e.target === modal) close(); });
+
+// Trigger 1: click the red conflict alert banner
+document.getElementById('conflictAlert')?.addEventListener('click', open);
+
+// Trigger 2: click the "Clashes" cell in the summary bar
+// The cell is dynamically generated, so use event delegation on summaryBar
+document.getElementById('summaryBar')?.addEventListener('click', e => {
+  const cell = e.target.closest('[class*="text-center"]');
+  if (cell && cell.textContent.toLowerCase().includes('clash')) open();
+});
 
 async function loadConflicts() {
   const id = State.getActiveTimetableId();
@@ -23,7 +31,6 @@ async function loadConflicts() {
   content.innerHTML = '<p class="text-[13px] text-[var(--text3)] italic">Checking…</p>';
 
   try {
-    // Get current timetable selection to send to the conflicts endpoint
     const tt = await API.getTimetableById(id);
     const r  = await API.detectConflicts(id, tt.selected || []);
 
