@@ -17,28 +17,29 @@
         <button class="btn" id="statsBtn">📊 Stats</button>
         <button class="btn" id="compareBtn">⚖ Compare</button>
         <button class="btn" id="exportBtn">📄 Export</button>
-        <button class="btn" id="conflictsBtn">⚠️ Conflicts</button>
         <button class="btn btn-green" id="autoBtn">⚡ Auto-schedule</button>
       </div>
     </div>
 
-    <!-- ── Summary bar ── -->
+    <!-- ── Summary bar (Clashes cell is clickable) ── -->
     <div
       class="grid bg-[var(--bg2)] border border-[var(--border)] rounded-xl overflow-hidden mb-5"
       style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));display:none"
       id="summaryBar">
     </div>
 
-    <!-- ── Conflict alert ── -->
+    <!-- ── Conflict alert (clickable to view details) ── -->
     <div
-      class="conflict-alert flex items-center gap-3 bg-[var(--red-bg)] border border-[rgba(247,111,111,0.3)] rounded-lg px-[18px] py-[14px] mb-5"
+      class="conflict-alert flex items-center gap-3 bg-[var(--red-bg)] border border-[rgba(247,111,111,0.3)] rounded-lg px-[18px] py-[14px] mb-5 cursor-pointer select-none"
       id="conflictAlert"
+      title="Click to view conflict details"
       style="display:none">
       <span class="text-[20px] flex-shrink-0">⚠️</span>
-      <div class="text-[13px] text-[var(--red)]">
+      <div class="text-[13px] text-[var(--red)] flex-1">
         <strong class="font-semibold">Time conflicts detected.</strong>
         Use slot alternatives in the panel below to resolve them.
       </div>
+      <span class="text-[12px] text-[var(--red)] font-mono opacity-60">View details →</span>
     </div>
 
     <!-- ── Timetable + controls ── -->
@@ -101,7 +102,7 @@
       <div>
         <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-xl overflow-hidden">
 
-          <!-- Active timetable header: name + share toggle -->
+          <!-- Active timetable header -->
           <div class="px-5 py-[14px] border-b border-[var(--border)] flex items-center gap-3">
             <div class="font-display text-[15px] font-bold text-[var(--text)] flex-1 min-w-0 truncate" id="activeTtName">My Timetable</div>
             <div class="flex items-center gap-2 flex-shrink-0">
@@ -175,19 +176,21 @@
 
   <!-- ── Compare modal ── -->
   <div class="fixed inset-0 z-[100] flex items-center justify-center" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);display:none" id="compareModal">
-    <div class="modal bg-[var(--bg2)] border border-[var(--border2)] rounded-xl w-[560px] max-w-[95vw] p-6" style="box-shadow:0 32px 80px var(--shadow-lg);max-height:85vh;overflow-y:auto">
+    <div class="modal bg-[var(--bg2)] border border-[var(--border2)] rounded-xl w-[680px] max-w-[95vw] p-6" style="box-shadow:0 32px 80px var(--shadow-lg);max-height:85vh;overflow-y:auto">
       <div class="flex items-center justify-between mb-5">
         <div class="font-display text-[17px] font-bold text-[var(--text)]">Compare Timetables</div>
         <button id="closeCompareBtn" class="text-[var(--text3)] hover:text-[var(--text)] bg-transparent border-0 cursor-pointer text-[18px] leading-none">×</button>
       </div>
-      <div class="mb-4">
-        <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]">Compare with</label>
-        <select id="compareSelect"
-          class="w-full py-2.5 px-[14px] bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text)] text-[13px] outline-none transition-colors focus:border-[var(--accent)]">
-          <option value="">Select a timetable…</option>
-        </select>
+      <div class="mb-4 flex gap-2 items-end">
+        <div class="flex-1">
+          <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]">Compare with</label>
+          <select id="compareSelect"
+            class="w-full py-2.5 px-[14px] bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text)] text-[13px] outline-none transition-colors focus:border-[var(--accent)]">
+            <option value="">Select a timetable…</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="runCompareBtn">Compare</button>
       </div>
-      <button class="btn btn-primary mb-5" id="runCompareBtn">Compare</button>
       <div id="compareContent"></div>
     </div>
   </div>
