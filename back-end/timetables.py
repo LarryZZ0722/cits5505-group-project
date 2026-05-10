@@ -57,42 +57,71 @@ def detect_conflicts(selected: list, courses: list) -> set:
 
 
 def run_auto_schedule(selected: list, courses: list, prefs: dict) -> list:
+    """
+    Improved auto-scheduler (fix for issue #9) — runs multiple passes
+    until no further improvement is found, preventing one unit's fix
+    from causing a clash in another.
+    Kalp Prajapati (25073034)
+    """
     avoid_8am    = prefs.get('avoid8am', False)
     compact_days = prefs.get('compactDays', False)
     free_fridays = prefs.get('freeFridays', False)
-    result = [dict(e) for e in selected]
 
-    for i, entry in enumerate(result):
-        course = next((c for c in courses if c['code'] == entry['code']), None)
-        if not course or not course.get('alternatives'):
-            continue
+    def score(entry_index: int, alt: int, current: list) -> float:
+        test    = [dict(e) for e in current]
+        test[entry_index]['altIdx'] = alt
+        course  = next((c for c in courses if c['code'] == test[entry_index]['code']), None)
+        if not course:
+            return float('inf')
+        sessions    = get_active_sessions(course, alt)
+        n_clash     = len(detect_conflicts(test, courses))
+        pen_8am     = 10 if avoid_8am    and any(s['hour'] == 8 for s in sessions) else 0
+        pen_fri     = 10 if free_fridays and any(s['day']  == 4 for s in sessions) else 0
 
-        best_alt, best_score = entry.get('altIdx', 0), float('inf')
-
-        other_days = set()
+        # compact_days: prefer slots on days already used by other units
         if compact_days:
-            for j, other in enumerate(result):
-                if j == i:
+            other_days = set()
+            for j, other in enumerate(current):
+                if j == entry_index:
                     continue
                 other_course = next((c for c in courses if c['code'] == other['code']), None)
                 if other_course:
                     for s in get_active_sessions(other_course, other.get('altIdx', 0)):
                         other_days.add(s['day'])
+            pen_compact = len({s['day'] for s in sessions} - other_days) * 5
+        else:
+            pen_compact = 0
 
-        for alt in range(len(course['alternatives']) + 1):
-            test = [dict(e) for e in result]
-            test[i]['altIdx'] = alt
-            n_clash  = len(detect_conflicts(test, courses))
-            sessions = get_active_sessions(course, alt)
-            pen_8am     = 10 if avoid_8am    and any(s['hour'] == 8 for s in sessions) else 0
-            pen_fri     = 10 if free_fridays and any(s['day']  == 4 for s in sessions) else 0
-            pen_compact = len({s['day'] for s in sessions} - other_days) * 5 if compact_days else 0
-            score = n_clash * 100 + pen_8am + pen_fri + pen_compact
+        return n_clash * 100 + pen_8am + pen_fri + pen_compact
 
-            if score < best_score:
-                best_score, best_alt = score, alt
+    result = [dict(e) for e in selected]
 
-        result[i]['altIdx'] = best_alt
+    # Multi-pass loop — keep improving until nothing changes
+    for _ in range(10):
+        improved = False
+
+        for i, entry in enumerate(result):
+            course = next((c for c in courses if c['code'] == entry['code']), None)
+            if not course:
+                continue
+
+            num_alts   = len(course.get('alternatives', []))
+            best_alt   = entry.get('altIdx', 0)
+            best_score = score(i, best_alt, result)
+
+            for alt in range(num_alts + 1):
+                s = score(i, alt, result)
+                if s < best_score:
+                    best_score = s
+                    best_alt   = alt
+
+            if best_alt != result[i].get('altIdx', 0):
+                result[i]['altIdx'] = best_alt
+                improved = True
+
+        if not improved:
+            break
+
     return result
 
 
