@@ -199,6 +199,7 @@ function bindFilters() {
       renderTable();
     });
   });
+  document.getElementById("facultyFilter")?.addEventListener("change", () => { tablePage = 0; renderTable(); });
 }
 
 function bindSearch() {
@@ -210,10 +211,12 @@ function bindSearch() {
 
 function getFilteredCourses() {
   const q = (document.getElementById("unitSearch")?.value || "").toLowerCase();
+  const faculty = document.getElementById("facultyFilter")?.value || "";
   return allCourses.filter((c) => {
+    const facultyOk = !faculty || c.faculty === faculty;
     const semOk = activeSems.length === 0 || c.sems.some(s => activeSems.includes(s));
     const qOk   = !q || c.code.toLowerCase().includes(q) || c.name.toLowerCase().includes(q) || c.faculty.toLowerCase().includes(q);
-    return semOk && qOk;
+    return semOk && facultyOk && qOk;
   });
 }
 

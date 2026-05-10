@@ -92,8 +92,13 @@ const API = {
      COURSES
   ════════════════════════════════════════ */
 
-  async getCourses() {
-    return request('/api/courses');
+  async getCourses({ semester, faculty, search } = {}) {
+    const params = new URLSearchParams();
+    if (semester) params.set('semester', semester);
+    if (faculty)  params.set('faculty',  faculty);
+    if (search)   params.set('search',   search);
+    const qs = params.toString();
+    return request(`/api/courses${qs ? '?' + qs : ''}`);
   },
 
   async getCourse(code) {
@@ -157,6 +162,18 @@ const API = {
       method: 'POST',
       body: JSON.stringify({ selected, preferences }),
     });
+  },
+
+  async getTimetableStats(id) {
+    return request(`/api/timetables/${id}/stats`);
+  },
+
+  async exportTimetable(id) {
+    return request(`/api/timetables/${id}/export`);
+  },
+
+  async compareTimetables(id, otherId) {
+    return request(`/api/timetables/${id}/compare/${otherId}`);
   },
 
   /* ── Backwards-compat wrappers (courses.js uses these) ── */

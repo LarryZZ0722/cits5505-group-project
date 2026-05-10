@@ -33,6 +33,7 @@ from friends import friends_bp
 from courses import courses_bp
 from pages import pages_bp
 from seed import seed
+from stats import stats_bp
 
 # ── App & config ──────────────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -56,6 +57,7 @@ app.register_blueprint(timetables_bp)
 app.register_blueprint(friends_bp)
 app.register_blueprint(courses_bp)
 app.register_blueprint(pages_bp)
+app.register_blueprint(stats_bp)
 
 # ── CSRF ──────────────────────────────────────────────────────────────
 _CSRF_EXEMPT = ('/api/auth/login', '/api/auth/register', '/api/health')
