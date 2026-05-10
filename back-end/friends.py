@@ -75,12 +75,31 @@ def send_friend_request():
     user      = current_user()
     data      = request.get_json(silent=True) or {}
     recipient = User.query.filter_by(student_number=data.get('studentNumber', '')).first()
+
     if not recipient:
         return err('User not found', 404)
     if recipient.id == user.id:
         return err('Cannot send a request to yourself', 422)
     if Friendship.query.filter_by(user_id=user.id, friend_id=recipient.id).first():
         return err('Already friends', 409)
+
+    # Auto-accept if recipient has already sent a request to sender (closes #13)
+    reverse_req = FriendRequest.query.filter_by(
+        sender_id=recipient.id, recipient_id=user.id
+    ).first()
+
+    if reverse_req:
+        # Delete the pending reverse request and create friendship directly
+        db.session.delete(reverse_req)
+        for row in Friendship.make(user.id, recipient.id):
+            if not Friendship.query.filter_by(
+                user_id=row.user_id, friend_id=row.friend_id
+            ).first():
+                db.session.add(row)
+        db.session.commit()
+        return jsonify({'ok': True, 'autoAccepted': True})
+
+    # Normal flow — create the friend request
     if not FriendRequest.query.filter_by(sender_id=user.id, recipient_id=recipient.id).first():
         db.session.add(FriendRequest(sender_id=user.id, recipient_id=recipient.id))
         db.session.commit()
