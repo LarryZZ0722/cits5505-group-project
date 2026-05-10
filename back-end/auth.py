@@ -1,9 +1,11 @@
 """
 auth.py — Authentication routes  /api/auth/*
+Fix issue #14: Move JWT from localStorage to httpOnly cookie
+Kalp Prajapati (25073034)
 """
 
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required
+from flask import Blueprint, request, jsonify, make_response
+from flask_jwt_extended import jwt_required, unset_jwt_cookies
 from models import db, User, Timetable
 from utils import ok, err, current_user, user_dict, get_initials, make_token
 
@@ -25,7 +27,20 @@ def auth_login():
     )
     if not user or not user.check_password(data.get('password', '')):
         return err('Invalid email/student ID or password', 401)
-    return jsonify({'user': user_dict(user), 'access_token': make_token(user)})
+
+    token    = make_token(user)
+    response = make_response(jsonify({'user': user_dict(user), 'access_token': token}))
+
+    # Set JWT as httpOnly cookie so JavaScript cannot access it (closes #14)
+    response.set_cookie(
+        'access_token_cookie',
+        token,
+        httponly=True,       # JS cannot read this cookie
+        samesite='Lax',      # protects against CSRF
+        secure=False,        # set True in production (requires HTTPS)
+        max_age=7 * 24 * 60 * 60  # 7 days, matches JWT expiry
+    )
+    return response
 
 
 @auth_bp.post('/api/auth/register')
@@ -55,12 +70,28 @@ def auth_register():
     db.session.flush()
     db.session.add(Timetable(user_id=user.id, name='My Timetable'))
     db.session.commit()
-    return jsonify({'user': user_dict(user), 'access_token': make_token(user)}), 201
+
+    token    = make_token(user)
+    response = make_response(jsonify({'user': user_dict(user), 'access_token': token}), 201)
+
+    # Set httpOnly cookie on register too (closes #14)
+    response.set_cookie(
+        'access_token_cookie',
+        token,
+        httponly=True,
+        samesite='Lax',
+        secure=False,
+        max_age=7 * 24 * 60 * 60
+    )
+    return response
 
 
 @auth_bp.post('/api/auth/logout')
 def auth_logout():
-    return ok()
+    response = make_response(ok())
+    # Clear the httpOnly cookie on logout (closes #14)
+    response.delete_cookie('access_token_cookie')
+    return response
 
 
 @auth_bp.put('/api/auth/password')
