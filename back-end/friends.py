@@ -13,9 +13,13 @@ friends.py — Friend relationships and requests
 """
 
 from flask import Blueprint, request, jsonify, current_app
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from models import db, User, Friendship, FriendRequest
 from utils import ok, err, current_user, user_dict
+
+limiter = Limiter(key_func=get_remote_address)
 
 friends_bp = Blueprint('friends', __name__)
 
@@ -66,6 +70,7 @@ def get_sent_requests():
 
 @friends_bp.post('/api/friends/requests')
 @jwt_required()
+@limiter.limit("10 per minute", error_message="Too many requests, please slow down.")
 def send_friend_request():
     user      = current_user()
     data      = request.get_json(silent=True) or {}
