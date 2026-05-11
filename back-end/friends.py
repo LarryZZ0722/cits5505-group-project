@@ -16,7 +16,7 @@ from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from models import db, User, Friendship, FriendRequest
+from models import db, User, Friendship, FriendRequest, TimetableView
 from utils import ok, err, current_user, user_dict
 
 limiter = Limiter(key_func=get_remote_address)
@@ -146,6 +146,11 @@ def get_friend_timetables(student_number):
     result = []
     for tt in friend.timetables:
         if tt.is_public:
+            # Log this view for issue #15
+            db.session.add(TimetableView(
+                timetable_id=tt.id,
+                viewer_id=me.id,
+            ))
             d = tt.to_dict()
             d['owner'] = {
                 'name':          friend.name,
@@ -153,4 +158,5 @@ def get_friend_timetables(student_number):
                 'studentNumber': friend.student_number,
             }
             result.append(d)
+    db.session.commit()
     return jsonify(result)

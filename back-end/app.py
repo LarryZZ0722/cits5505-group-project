@@ -1,22 +1,5 @@
 """
 app.py — UWA Planner Flask application entry point
-
-Blueprints
-  auth.py       →  /api/health  /api/auth/*
-  users.py      →  /api/profile  /api/users/*
-  timetables.py →  /api/timetables/*
-  friends.py    →  /api/friends/*
-  courses.py    →  /api/courses/*
-  pages.py      →  /  /auth  /schedule  /courses  /friends  /profile
-
-Other modules
-  models.py  — SQLAlchemy models (User, Timetable, Friendship, …)
-  utils.py   — Shared helpers (current_user, ok, err, load_courses, …)
-  seed.py    — Demo data, runs automatically on every startup
-
-Start the server
-    cd back-end
-    python app.py          # also seeds the database
 """
 
 import os
@@ -38,7 +21,7 @@ from stats import stats_bp
 # ── App & config ──────────────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-app = Flask(__name__)  # templates/ and static/ live inside back-end/ by convention
+app = Flask(__name__)
 app.config.update(
     SECRET_KEY                     = os.environ.get('SECRET_KEY', 'dev-secret-change-in-production'),
     SQLALCHEMY_DATABASE_URI        = f'sqlite:///{os.path.join(BASE_DIR, "planner.db")}',

@@ -192,3 +192,17 @@ class FriendRequest(db.Model):
 
     sender    = db.relationship('User', foreign_keys=[sender_id],    back_populates='sent_requests')
     recipient = db.relationship('User', foreign_keys=[recipient_id], back_populates='recv_requests')
+
+
+# ── TimetableView ─────────────────────────────────────────────────────
+# Logs when a friend views someone's public timetable (issue #15)
+class TimetableView(db.Model):
+    __tablename__ = 'timetable_views'
+
+    id           = db.Column(db.Integer,  primary_key=True)
+    timetable_id = db.Column(db.Integer,  db.ForeignKey('timetables.id'), nullable=False)
+    viewer_id    = db.Column(db.Integer,  db.ForeignKey('users.id'),      nullable=False)
+    viewed_at    = db.Column(db.DateTime, default=datetime.utcnow)
+
+    timetable = db.relationship('Timetable', foreign_keys=[timetable_id])
+    viewer    = db.relationship('User',      foreign_keys=[viewer_id])
