@@ -89,13 +89,24 @@ def send_friend_request():
     ).first()
 
     if reverse_req:
-        # Delete the pending reverse request and create friendship directly
+        # Delete reverse request
         db.session.delete(reverse_req)
+
+        # Also delete forward request if it somehow exists
+        forward_req = FriendRequest.query.filter_by(
+            sender_id=user.id, recipient_id=recipient.id
+        ).first()
+        if forward_req:
+            db.session.delete(forward_req)
+
+        # Create mutual friendship both directions
         for row in Friendship.make(user.id, recipient.id):
-            if not Friendship.query.filter_by(
+            existing = Friendship.query.filter_by(
                 user_id=row.user_id, friend_id=row.friend_id
-            ).first():
+            ).first()
+            if not existing:
                 db.session.add(row)
+
         db.session.commit()
         return jsonify({'ok': True, 'autoAccepted': True})
 
@@ -104,7 +115,6 @@ def send_friend_request():
         db.session.add(FriendRequest(sender_id=user.id, recipient_id=recipient.id))
         db.session.commit()
     return ok()
-
 
 @friends_bp.put('/api/friends/requests/<student_number>/accept')
 @jwt_required()

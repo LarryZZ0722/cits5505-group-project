@@ -4,3 +4,4 @@ flask-cors>=4.0
 flask-jwt-extended>=4.6
 flask-wtf>=1.2
 werkzeug>=3.0
+flask-limiter>=4.0
