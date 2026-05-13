@@ -1,6 +1,31 @@
 {% extends "base.html" %}
 {% block title %}My Schedule — UWA Planner{% endblock %}
 {% block body %}
+<style>
+  .pref-chip {
+    padding: 3px 8px; font-size: 11px; font-family: var(--font-mono, monospace);
+    border: 1px solid var(--border2); border-radius: 6px; cursor: pointer;
+    background: var(--bg3); color: var(--text2); transition: all .15s;
+  }
+  .pref-chip.on, .pref-chip:hover {
+    background: var(--accent-glow); border-color: var(--accent); color: var(--accent);
+  }
+  .pref-priority-item:hover { border-color: var(--border2); }
+  #prefConsec {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 4px; border-radius: 2px;
+    background: var(--border2); outline: none; cursor: pointer;
+  }
+  #prefConsec::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--accent); cursor: pointer;
+  }
+  #prefConsec::-moz-range-thumb {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--accent); cursor: pointer; border: none;
+  }
+</style>
 
   <!-- Nav injected by js/utils/components.js -->
 
@@ -14,6 +39,7 @@
       </div>
       <div class="flex gap-2 flex-shrink-0 flex-wrap">
         <a class="btn" href="/courses">+ Add units</a>
+        <button class="btn" id="addCustomBtn">+ Custom unit</button>
         <button class="btn" id="statsBtn">📊 Stats</button>
         <button class="btn" id="compareBtn">⚖ Compare</button>
         <button class="btn" id="exportBtn">📄 Export</button>
@@ -28,18 +54,28 @@
       id="summaryBar">
     </div>
 
-    <!-- ── Conflict alert (clickable to view details) ── -->
+    <!-- ── Conflict alert (issue #24 — improved guidance) ── -->
     <div
-      class="conflict-alert flex items-center gap-3 bg-[var(--red-bg)] border border-[rgba(247,111,111,0.3)] rounded-lg px-[18px] py-[14px] mb-5 cursor-pointer select-none"
+      class="conflict-alert flex items-start gap-3 bg-[var(--red-bg)] border border-[rgba(247,111,111,0.3)] rounded-lg px-[18px] py-[14px] mb-5"
       id="conflictAlert"
-      title="Click to view conflict details"
       style="display:none">
-      <span class="text-[20px] flex-shrink-0">⚠️</span>
-      <div class="text-[13px] text-[var(--red)] flex-1">
-        <strong class="font-semibold">Time conflicts detected.</strong>
-        Use slot alternatives in the panel below to resolve them.
+      <span class="text-[20px] flex-shrink-0 mt-0.5">⚠️</span>
+      <div class="flex-1 min-w-0">
+        <div class="text-[13px] text-[var(--red)] font-semibold mb-1">Time conflicts detected</div>
+        <div class="text-[12px] text-[var(--red)] opacity-80 mb-2" id="conflictHint">
+          Some units have overlapping sessions.
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <button id="resolveAutoBtn"
+            class="text-[11px] font-medium px-2.5 py-1 rounded border border-[rgba(247,111,111,.4)] text-[var(--red)] hover:bg-[rgba(247,111,111,.15)] transition-colors cursor-pointer bg-transparent">
+            ⚡ Auto-resolve
+          </button>
+          <button id="viewConflictsBtn"
+            class="text-[11px] font-medium px-2.5 py-1 rounded border border-[rgba(247,111,111,.4)] text-[var(--red)] hover:bg-[rgba(247,111,111,.15)] transition-colors cursor-pointer bg-transparent">
+            🔍 View details
+          </button>
+        </div>
       </div>
-      <span class="text-[12px] text-[var(--red)] font-mono opacity-60">View details →</span>
     </div>
 
     <!-- ── Timetable + controls ── -->
@@ -59,22 +95,58 @@
           </div>
         </div>
 
-        <!-- Preferences -->
+        <!-- Preferences (issue #24) -->
         <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-xl overflow-hidden mb-3">
           <div class="px-4 py-[14px] border-b border-[var(--border)]">
-            <div class="font-mono text-[10px] tracking-[.08em] uppercase text-[var(--text3)] mb-2.5">Preferences</div>
-            <div class="flex items-center justify-between mb-2 text-[12px] text-[var(--text2)]">
-              <span>Avoid 8am starts</span>
-              <label class="toggle"><input type="checkbox" id="prefNo8" checked><div class="toggle-track"></div></label>
+            <div class="font-mono text-[10px] tracking-[.08em] uppercase text-[var(--text3)] mb-3">Preferences</div>
+
+            <!-- Earliest start time -->
+            <div class="mb-3">
+              <div class="text-[11px] font-medium text-[var(--text2)] mb-1.5">Earliest start time</div>
+              <div class="flex gap-1 flex-wrap" id="prefStartBtns">
+                <button class="pref-chip" data-hour="8">8 am</button>
+                <button class="pref-chip on" data-hour="9">9 am</button>
+                <button class="pref-chip" data-hour="10">10 am</button>
+                <button class="pref-chip" data-hour="11">11 am</button>
+                <button class="pref-chip" data-hour="12">12 pm</button>
+              </div>
             </div>
-            <div class="flex items-center justify-between mb-2 text-[12px] text-[var(--text2)]">
+
+            <!-- Target days off -->
+            <div class="mb-3">
+              <div class="text-[11px] font-medium text-[var(--text2)] mb-1.5">Target days off</div>
+              <div class="flex gap-1" id="prefDayBtns">
+                <button class="pref-chip" data-day="Monday">Mon</button>
+                <button class="pref-chip" data-day="Tuesday">Tue</button>
+                <button class="pref-chip" data-day="Wednesday">Wed</button>
+                <button class="pref-chip" data-day="Thursday">Thu</button>
+                <button class="pref-chip" data-day="Friday">Fri</button>
+              </div>
+            </div>
+
+            <!-- Max consecutive hours -->
+            <div class="mb-3">
+              <div class="flex items-center justify-between text-[11px] text-[var(--text2)] mb-1.5">
+                <span class="font-medium">Max consecutive hours</span>
+                <span id="prefConsecVal" class="font-mono text-[10px] text-[var(--accent)]">4 h</span>
+              </div>
+              <input type="range" id="prefConsec" min="1" max="6" value="4" step="1"
+                class="w-full h-[3px] rounded appearance-none cursor-pointer"
+                style="accent-color:var(--accent)">
+            </div>
+
+            <!-- Compact days -->
+            <div class="flex items-center justify-between text-[12px] text-[var(--text2)]">
               <span>Compact days</span>
               <label class="toggle"><input type="checkbox" id="prefCompact"><div class="toggle-track"></div></label>
             </div>
-            <div class="flex items-center justify-between text-[12px] text-[var(--text2)]">
-              <span>Free Fridays</span>
-              <label class="toggle"><input type="checkbox" id="prefFri"><div class="toggle-track"></div></label>
-            </div>
+          </div>
+
+          <!-- Priority ranking -->
+          <div class="px-4 py-[14px] border-b border-[var(--border)]">
+            <div class="font-mono text-[10px] tracking-[.08em] uppercase text-[var(--text3)] mb-1">Priority order</div>
+            <div class="text-[10px] text-[var(--text3)] mb-2">Drag to reorder — top = most important</div>
+            <div id="prefPriorityList" class="flex flex-col gap-1"></div>
           </div>
 
           <!-- Slot alternatives -->
@@ -219,6 +291,50 @@
       </div>
       <div id="conflictsContent">
         <div class="text-[13px] text-[var(--text3)] italic">Loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Custom unit modal (add + edit, issue #23) ── -->
+  <div class="overlay fixed inset-0 z-[100] flex items-center justify-center" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px)" id="customUnitModal">
+    <div class="modal bg-[var(--bg2)] border border-[var(--border2)] rounded-xl w-[480px] max-w-[95vw] p-6" style="box-shadow:0 32px 80px var(--shadow-lg);max-height:85vh;overflow-y:auto">
+      <div class="font-display text-[17px] font-bold text-[var(--text)] mb-5" id="customUnitModalTitle">Add custom unit</div>
+      <div class="mb-3">
+        <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]">Unit code</label>
+        <input class="w-full py-2.5 px-[14px] bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text)] text-[14px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)] uppercase"
+          type="text" id="customUnitCode" placeholder="e.g. CITS3001">
+      </div>
+      <div class="mb-3">
+        <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]">Unit name</label>
+        <input class="w-full py-2.5 px-[14px] bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text)] text-[13px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)]"
+          type="text" id="customUnitName" placeholder="e.g. Introduction to Robotics">
+      </div>
+      <div class="mb-3">
+        <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]">Semester</label>
+        <div class="flex gap-1.5" id="customUnitSemBtns">
+          <button class="sem-btn on" data-sem="S1">Sem 1</button>
+          <button class="sem-btn" data-sem="S2">Sem 2</button>
+        </div>
+      </div>
+      <div class="mb-4">
+        <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]">Sessions</label>
+        <div id="customUnitSessionList" class="flex flex-col gap-1.5 mb-2">
+          <div class="session-row flex gap-1 items-center">
+            <select class="sess-type sess-input"><option>LEC</option><option>TUT</option><option>LAB</option></select>
+            <select class="sess-day sess-input">
+              <option value="0">Mon</option><option value="1">Tue</option>
+              <option value="2">Wed</option><option value="3">Thu</option><option value="4">Fri</option>
+            </select>
+            <input type="number" class="sess-start sess-input sess-num" min="8" max="19" value="9" title="Start hour">
+            <span class="sess-sep">–</span>
+            <input type="number" class="sess-end sess-input sess-num" min="9" max="20" value="11" title="End hour">
+          </div>
+        </div>
+        <button type="button" id="customUnitAddSessionBtn" class="text-[11px] text-[var(--accent)] font-medium bg-transparent border-0 cursor-pointer hover:underline p-0 leading-none">+ Add session</button>
+      </div>
+      <div class="flex gap-2 justify-end">
+        <button class="btn" id="cancelCustomUnitBtn">Cancel</button>
+        <button class="btn btn-primary" id="confirmCustomUnitBtn">Save</button>
       </div>
     </div>
   </div>

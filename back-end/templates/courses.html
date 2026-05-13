@@ -183,5 +183,33 @@
     </div>
   </div>
 
+  <!-- Edit custom unit modal (issue #23) -->
+  <div class="overlay fixed inset-0 z-[100] flex items-center justify-center" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px)" id="editCustomModal">
+    <div class="modal bg-[var(--bg2)] border border-[var(--border2)] rounded-xl w-[480px] max-w-[95vw] p-6" style="box-shadow:0 32px 80px var(--shadow-lg);max-height:85vh;overflow-y:auto">
+      <div class="font-display text-[17px] font-bold text-[var(--text)] mb-5">Edit custom unit</div>
+      <div class="mb-3">
+        <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]">Unit name</label>
+        <input class="w-full py-2.5 px-[14px] bg-[var(--bg3)] border border-[var(--border2)] rounded text-[var(--text)] text-[13px] outline-none transition-colors focus:border-[var(--accent)] placeholder:text-[var(--text3)]"
+          type="text" id="editCustomName" placeholder="Unit name">
+      </div>
+      <div class="mb-3">
+        <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]">Semester</label>
+        <div class="flex gap-1.5" id="editSemBtns">
+          <button class="sem-btn" data-sem="S1">Sem 1</button>
+          <button class="sem-btn" data-sem="S2">Sem 2</button>
+        </div>
+      </div>
+      <div class="mb-4">
+        <label class="block text-[12px] font-medium text-[var(--text2)] mb-1.5 tracking-[.02em]">Sessions</label>
+        <div id="editSessionList" class="flex flex-col gap-1.5 mb-2"></div>
+        <button type="button" id="editAddSessionBtn" class="text-[11px] text-[var(--accent)] font-medium bg-transparent border-0 cursor-pointer hover:underline p-0 leading-none">+ Add session</button>
+      </div>
+      <div class="flex gap-2 justify-end">
+        <button class="btn" id="cancelEditBtn">Cancel</button>
+        <button class="btn btn-primary" id="confirmEditBtn">Save changes</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="/static/js/courses.js"></script>
 {% endblock %}
