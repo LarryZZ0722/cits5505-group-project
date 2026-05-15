@@ -26,6 +26,8 @@ let activeGhostCode = null;
 document.addEventListener('DOMContentLoaded', async () => {
   if (!State.getUser()) { window.location.href = '/auth'; return; }
 
+  renderScheduleSkeleton();
+
   try {
     [allCourses, allTimetables] = await Promise.all([
       API.getCourses(),
@@ -63,6 +65,107 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderUI();
   bindControls();
 });
+
+/* ── Loading skeleton ───────────────────────── */
+function renderScheduleSkeleton() {
+  const nameEl = document.getElementById('activeTtName');
+  if (nameEl) nameEl.textContent = 'Loading timetable...';
+
+  const ttList = document.getElementById('ttList');
+  if (ttList) {
+    ttList.innerHTML = Array.from({ length: 3 }, () => `
+      <div class="tt-list-item">
+        <span class="skeleton skeleton-dot"></span>
+        <span class="skeleton skeleton-sidebar-line"></span>
+      </div>
+    `).join('');
+  }
+
+  const summaryBar = document.getElementById('summaryBar');
+  if (summaryBar) {
+    summaryBar.style.display = '';
+    summaryBar.innerHTML = Array.from({ length: 3 }, () => `
+      <div class="text-center px-4 py-5">
+        <div class="skeleton skeleton-summary-number mx-auto"></div>
+        <div class="skeleton skeleton-summary-label mx-auto mt-2"></div>
+      </div>
+    `).join('');
+  }
+
+  const legendList = document.getElementById('legendList');
+  if (legendList) {
+    legendList.innerHTML = Array.from({ length: 3 }, () => `
+      <div class="flex items-center gap-2.5">
+        <div class="skeleton skeleton-dot"></div>
+        <div class="skeleton skeleton-legend-code"></div>
+        <div class="skeleton skeleton-legend-name"></div>
+      </div>
+    `).join('');
+  }
+
+  const variantList = document.getElementById('variantList');
+  if (variantList) {
+    variantList.innerHTML = Array.from({ length: 2 }, () => `
+      <div class="variant-btn">
+        <div class="skeleton skeleton-dot"></div>
+        <div class="skeleton skeleton-sidebar-line"></div>
+      </div>
+    `).join('');
+  }
+
+  renderTimetableSkeleton();
+  renderUnitCardSkeleton();
+}
+
+function renderTimetableSkeleton() {
+  const body = document.getElementById('ttBody');
+  if (!body) return;
+
+  let html = '';
+  for (let r = 0; r < TOTAL_H; r++) {
+    html += `<div class="tt-time">${START_H + r}:00</div>`;
+    for (let d = 0; d < 5; d++) {
+      html += `
+        <div class="tt-cell">
+          ${r % 3 === 0 && d % 2 === 0 ? '<div class="skeleton skeleton-class-block"></div>' : ''}
+        </div>
+      `;
+    }
+  }
+
+  body.innerHTML = html;
+}
+
+function renderUnitCardSkeleton() {
+  const grid = document.getElementById('unitsGrid');
+  const empty = document.getElementById('emptyState');
+
+  if (empty) empty.style.display = 'none';
+  if (!grid) return;
+
+  grid.style.display = '';
+  grid.innerHTML = Array.from({ length: 3 }, () => `
+    <div class="bg-[var(--bg2)] border border-[var(--border)] rounded-[var(--r-xl)] overflow-hidden">
+      <div class="flex items-start gap-3 p-4">
+        <div class="skeleton skeleton-card-bar"></div>
+        <div class="flex-1 min-w-0">
+          <div class="skeleton skeleton-card-code"></div>
+          <div class="skeleton skeleton-card-title"></div>
+        </div>
+        <div class="skeleton skeleton-card-button"></div>
+      </div>
+      <div class="px-4 pb-4 flex flex-col gap-3">
+        <div class="skeleton skeleton-card-session"></div>
+        <div class="skeleton skeleton-card-session short"></div>
+        <div class="flex flex-wrap gap-1.5">
+          <div class="skeleton skeleton-tag"></div>
+          <div class="skeleton skeleton-tag"></div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
 
 /* ── Load full data for the active timetable ── */
 async function loadActiveTimetable() {

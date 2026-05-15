@@ -19,6 +19,7 @@ const PAGE_SIZE   = 8;
 document.addEventListener("DOMContentLoaded", async () => {
   const loggedIn = !!State.getUser();
 
+  renderCourseTableSkeleton();
   if (!loggedIn) {
     document.getElementById("basketCard")?.style.setProperty("display", "none");
     document.getElementById("manualCard")?.style.setProperty("display", "none");
@@ -221,6 +222,36 @@ function getFilteredCourses() {
 }
 
 /* ── Table ───────────────────────────────── */
+
+function renderCourseTableSkeleton() {
+  const tbody = document.getElementById("courseTableBody");
+  if (!tbody) return;
+
+  tbody.innerHTML = Array.from({ length: PAGE_SIZE }, () => `
+    <tr class="skeleton-row">
+      <td><div class="skeleton skeleton-code"></div></td>
+      <td>
+        <div class="skeleton skeleton-title"></div>
+        <div class="skeleton skeleton-subtitle"></div>
+      </td>
+      <td><div class="skeleton skeleton-pill"></div></td>
+      <td>
+        <div class="flex flex-wrap gap-1">
+          <div class="skeleton skeleton-tag"></div>
+          <div class="skeleton skeleton-tag"></div>
+        </div>
+      </td>
+      <td><div class="skeleton skeleton-button"></div></td>
+    </tr>
+  `).join("");
+
+  const tableCount = document.getElementById("tableCount");
+  if (tableCount) tableCount.textContent = "Loading units...";
+
+  const pagination = document.getElementById("pagination");
+  if (pagination) pagination.innerHTML = "";
+}
+
 function renderTable() {
   const courses = getFilteredCourses();
   const start   = tablePage * PAGE_SIZE;
