@@ -21,7 +21,8 @@ let selected         = [];
 let conflicts        = new Set();
 let isPublic         = false;
 let timetableName    = '';
-let activeGhostCode = null;
+let activeGhostCode  = null;
+let editingCustomCode = null;  // code being edited in modal (issue #23)
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (!State.getUser()) { window.location.href = '/auth'; return; }
@@ -64,6 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderTimetableList();
   renderUI();
   bindControls();
+  renderPriorityList();
 });
 
 /* ── Loading skeleton ───────────────────────── */
@@ -314,9 +316,49 @@ function renderSummaryBar(conflicts) {
 }
 
 /* ── Conflict alert ──────────────────────────── */
+function detect_conflicts_client(sel) {
+  // Lightweight client-side conflict check (mirrors backend logic)
+  const slots = [];
+  sel.forEach(entry => {
+    const course = allCourses.find(c => c.code === entry.code);
+    if (!course) return;
+    getActiveSessions(course, entry.altIdx || 0).forEach(s => {
+      slots.push({ day: s.day, start: s.hour, end: s.hour + s.duration, code: entry.code });
+    });
+  });
+  const conflict = new Set();
+  for (let i = 0; i < slots.length; i++) {
+    for (let j = i + 1; j < slots.length; j++) {
+      const a = slots[i], b = slots[j];
+      if (a.day === b.day && a.start < b.end && b.start < a.end) {
+        conflict.add(a.code); conflict.add(b.code);
+      }
+    }
+  }
+  return conflict;
+}
+
 function renderConflictAlert(conflicts) {
-  const el = document.getElementById('conflictAlert');
-  if (el) el.style.display = conflicts.size ? 'flex' : 'none';
+  const el   = document.getElementById('conflictAlert');
+  const hint = document.getElementById('conflictHint');
+  if (!el) return;
+
+  if (!conflicts.size) { el.style.display = 'none'; return; }
+  el.style.display = '';
+
+  if (hint) {
+    // conflicts may be a Set of code strings or conflict objects
+    const codeList = [...conflicts].map(c => {
+      if (typeof c === 'string') return c;
+      if (c?.code) return c.code;
+      if (c?.unit_a?.code) return c.unit_a.code;
+      return null;
+    }).filter(Boolean);
+    const codes = [...new Set(codeList)].join(', ') || 'Some units';
+    hint.textContent = codeList.length === 1
+      ? `${codes} has a session overlap. Try swapping its slot alternative below.`
+      : `${codes} have overlapping sessions. Auto-resolve will try to fix them using your preferences.`;
+  }
 }
 
 /* ── Unit legend ─────────────────────────────── */
@@ -460,6 +502,10 @@ function renderUnitCards(conflicts) {
     });
   });
 
+  grid.querySelectorAll('.edit-custom-btn').forEach(btn => {
+    btn.addEventListener('click', () => openCustomUnitModal('edit', btn.dataset.code));
+  });
+
   grid.querySelectorAll('.swap-btn').forEach(btn => {
     btn.addEventListener('click', () => showAltDrawer(btn.dataset.code));
   });
@@ -485,6 +531,9 @@ function buildUnitCard(course, altIdx, col, isConflict) {
   ].join('');
 
   const cardBorder = isConflict ? 'border-[var(--red)]' : 'border-[var(--border)] hover:border-[var(--border2)]';
+  const editBtn = course.custom
+    ? `<button class="btn btn-sm edit-custom-btn flex-shrink-0" data-code="${course.code}" title="Edit unit">✏ Edit</button>`
+    : '';
   return `<div class="bg-[var(--bg2)] border ${cardBorder} rounded-[var(--r-xl)] overflow-hidden transition-[border-color,transform] hover:-translate-y-0.5">
     <div class="flex items-start gap-3 p-4">
       <div class="w-[3px] self-stretch rounded-full flex-shrink-0" style="background:${col.border}"></div>
@@ -492,7 +541,10 @@ function buildUnitCard(course, altIdx, col, isConflict) {
         <div class="font-mono text-[11px] font-medium text-[var(--text3)] uppercase tracking-wider">${course.code}</div>
         <div class="font-display text-[15px] font-semibold text-[var(--text)] leading-tight mt-0.5">${course.name}</div>
       </div>
-      <button class="btn btn-sm btn-danger remove-unit-btn flex-shrink-0" data-code="${course.code}">Remove</button>
+      <div class="flex gap-2 flex-shrink-0">
+        ${editBtn}
+        <button class="btn btn-sm btn-danger remove-unit-btn" data-code="${course.code}">Remove</button>
+      </div>
     </div>
     <div class="px-4 pb-4 flex flex-col gap-3">
       <div class="flex flex-col gap-1.5">${sessionHTML}</div>
@@ -585,7 +637,9 @@ function clearGhosts() {
 /* ── Bind controls ───────────────────────────── */
 function bindControls() {
   document.getElementById('newTtBtn')?.addEventListener('click', openNewTtModal);
+  document.getElementById('addCustomBtn')?.addEventListener('click', () => openCustomUnitModal('add'));
   bindNewTtModal();
+  bindCustomUnitModal();
 
   document.getElementById('publicToggle')?.addEventListener('change', async e => {
     isPublic = e.target.checked;
@@ -599,18 +653,35 @@ function bindControls() {
 
   document.getElementById('autoBtn')?.addEventListener('click', async () => {
     if (!activeTtId || !selected.length) { toast('No units to schedule'); return; }
-    const prefs = {
-      avoid8am:    document.getElementById('prefNo8')?.checked    || false,
-      compactDays: document.getElementById('prefCompact')?.checked || false,
-      freeFridays: document.getElementById('prefFri')?.checked     || false,
-    };
+    const prefs = getAutoPrefs();
     try {
       const { selected: newSel } = await API.autoSchedule(activeTtId, { selected, preferences: prefs });
       selected = newSel;
       await saveAndRefresh();
-      toast('Timetable auto-scheduled', 'success');
+
+      // Post-schedule feedback — tell the user whether preferences were met
+      const remaining = detect_conflicts_client(newSel);
+      if (remaining.size > 0) {
+        toast(`Auto-scheduled — ${remaining.size} conflict(s) remain. Try swapping slot alternatives.`, 'error');
+      } else {
+        toast('Timetable auto-scheduled ✓', 'success');
+      }
     } catch { toast('Auto-schedule failed', 'error'); }
   });
+
+  // Conflict alert action buttons (issue #24)
+  document.getElementById('resolveAutoBtn')?.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    document.getElementById('autoBtn')?.click();
+  });
+
+  document.getElementById('viewConflictsBtn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const modal = document.getElementById('conflictsModal');
+    if (modal) modal.style.display = '';
+  });
+
+  bindPreferences();
 
 }
 
@@ -650,9 +721,249 @@ async function doCreateTimetable() {
   } catch { toast('Could not create timetable', 'error'); }
 }
 
-/* ── HTML escape ─────────────────────────────── */
+/* ── Priority list (issue #24) ───────────────── */
+const PREF_PRIORITY_ITEMS = [
+  { key: 'targetDaysOff',  label: 'Days off' },
+  { key: 'earliestStart',  label: 'Earliest start' },
+  { key: 'maxConsecutive', label: 'Max consecutive' },
+  { key: 'compactDays',    label: 'Compact days' },
+];
+
+function renderPriorityList() {
+  const list = document.getElementById('prefPriorityList');
+  if (!list) return;
+  list.innerHTML = PREF_PRIORITY_ITEMS.map((item, i) => `
+    <div class="pref-priority-item flex items-center gap-2 px-2 py-1.5 bg-[var(--bg3)] border border-[var(--border)] rounded text-[11px] select-none cursor-grab active:cursor-grabbing"
+         draggable="true" data-key="${item.key}">
+      <span class="text-[var(--text3)] text-[13px] leading-none">⋮⋮</span>
+      <span class="flex-1 text-[var(--text2)]">${item.label}</span>
+      <span class="pref-rank font-mono text-[10px] text-[var(--text3)]">${i + 1}</span>
+    </div>`).join('');
+  bindPriorityDrag();
+}
+
+function updatePriorityRanks() {
+  document.querySelectorAll('#prefPriorityList .pref-priority-item').forEach((el, i) => {
+    const rank = el.querySelector('.pref-rank');
+    if (rank) rank.textContent = i + 1;
+  });
+}
+
+function bindPriorityDrag() {
+  const list = document.getElementById('prefPriorityList');
+  if (!list) return;
+  let dragged = null;
+
+  list.addEventListener('dragstart', e => {
+    dragged = e.target.closest('.pref-priority-item');
+    setTimeout(() => { if (dragged) dragged.style.opacity = '0.4'; }, 0);
+  });
+  list.addEventListener('dragend', () => {
+    if (dragged) dragged.style.opacity = '';
+    dragged = null;
+    updatePriorityRanks();
+  });
+  list.addEventListener('dragover', e => {
+    e.preventDefault();
+    const target = e.target.closest('.pref-priority-item');
+    if (!target || !dragged || target === dragged) return;
+    const mid = target.getBoundingClientRect().top + target.getBoundingClientRect().height / 2;
+    list.insertBefore(dragged, e.clientY < mid ? target : target.nextSibling);
+  });
+}
+
+function getAutoPrefs() {
+  const startBtn      = document.querySelector('#prefStartBtns .pref-chip.on');
+  const earliestStart = startBtn ? parseInt(startBtn.dataset.hour) : 9;
+
+  const daysOff = [...document.querySelectorAll('#prefDayBtns .pref-chip.on')]
+    .map(btn => btn.dataset.day);
+
+  const maxConsec  = parseInt(document.getElementById('prefConsec')?.value ?? '4');
+  const compactDays = document.getElementById('prefCompact')?.checked || false;
+
+  const priorities = [...document.querySelectorAll('#prefPriorityList .pref-priority-item')]
+    .map(el => el.dataset.key);
+
+  return {
+    earliestStart,
+    targetDaysOff:       daysOff,
+    maxConsecutiveHours: maxConsec,
+    compactDays,
+    priorities,
+    // backward-compat fields
+    avoid8am:    earliestStart > 8,
+    freeFridays: daysOff.includes('Friday'),
+  };
+}
+
+function bindPreferences() {
+  // Single-select for start time
+  document.querySelectorAll('#prefStartBtns .pref-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#prefStartBtns .pref-chip').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+    });
+  });
+
+  // Multi-select for days off
+  document.querySelectorAll('#prefDayBtns .pref-chip').forEach(btn => {
+    btn.addEventListener('click', () => btn.classList.toggle('on'));
+  });
+
+  // Consecutive hours slider label
+  const slider = document.getElementById('prefConsec');
+  const label  = document.getElementById('prefConsecVal');
+  slider?.addEventListener('input', () => {
+    if (label) label.textContent = `${slider.value} h`;
+  });
+
+  renderPriorityList();
+}
 function escHtml(s) {
   return String(s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;')
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/* ── Custom unit modal (add + edit, issue #23) ── */
+function makeCustomSessionRow(removable) {
+  const row = document.createElement('div');
+  row.className = 'session-row flex gap-1 items-center';
+  row.innerHTML = `
+    <select class="sess-type sess-input"><option>LEC</option><option>TUT</option><option>LAB</option></select>
+    <select class="sess-day sess-input">
+      <option value="0">Mon</option><option value="1">Tue</option>
+      <option value="2">Wed</option><option value="3">Thu</option><option value="4">Fri</option>
+    </select>
+    <input type="number" class="sess-start sess-input sess-num" min="8" max="19" value="9">
+    <span class="sess-sep">–</span>
+    <input type="number" class="sess-end sess-input sess-num" min="9" max="20" value="11">
+    ${removable ? '<button type="button" class="sess-rm" aria-label="Remove">×</button>' : ''}
+  `;
+  if (removable) row.querySelector('.sess-rm').addEventListener('click', () => row.remove());
+  return row;
+}
+
+function getCustomSessionRows() {
+  return [...document.querySelectorAll('#customUnitSessionList .session-row')].map(row => {
+    const start = parseInt(row.querySelector('.sess-start').value);
+    const end   = parseInt(row.querySelector('.sess-end').value);
+    return {
+      type:     row.querySelector('.sess-type').value,
+      day:      parseInt(row.querySelector('.sess-day').value),
+      hour:     start,
+      duration: Math.max(1, end - start),
+    };
+  }).filter(s => s.duration > 0);
+}
+
+function fillCustomSessionRows(sessions) {
+  const list = document.getElementById('customUnitSessionList');
+  if (!list) return;
+  list.innerHTML = '';
+  const rows = sessions.length ? sessions : [{ type: 'LEC', day: 0, hour: 9, duration: 2 }];
+  rows.forEach((s, i) => {
+    const row = makeCustomSessionRow(i > 0);
+    row.querySelector('.sess-type').value  = s.type || 'LEC';
+    row.querySelector('.sess-day').value   = String(s.day   ?? 0);
+    row.querySelector('.sess-start').value = String(s.hour  ?? 9);
+    row.querySelector('.sess-end').value   = String((s.hour ?? 9) + (s.duration ?? 2));
+    list.appendChild(row);
+  });
+}
+
+function openCustomUnitModal(mode, code) {
+  editingCustomCode = mode === 'edit' ? code : null;
+  const title     = document.getElementById('customUnitModalTitle');
+  const codeInput = document.getElementById('customUnitCode');
+  const nameInput = document.getElementById('customUnitName');
+
+  if (mode === 'edit' && code) {
+    const course = allCourses.find(c => c.code === code);
+    if (!course) return;
+    if (title)     title.textContent = 'Edit custom unit';
+    if (codeInput) { codeInput.value = course.code; codeInput.disabled = true; }
+    if (nameInput) nameInput.value = course.name;
+    document.querySelectorAll('#customUnitSemBtns .sem-btn').forEach(btn => {
+      btn.classList.toggle('on', course.sems.includes(btn.dataset.sem));
+    });
+    fillCustomSessionRows(course.sessions || []);
+  } else {
+    if (title)     title.textContent = 'Add custom unit';
+    if (codeInput) { codeInput.value = ''; codeInput.disabled = false; }
+    if (nameInput) nameInput.value = '';
+    document.querySelectorAll('#customUnitSemBtns .sem-btn').forEach((btn, i) => {
+      btn.classList.toggle('on', i === 0);
+    });
+    fillCustomSessionRows([]);
+  }
+
+  document.getElementById('customUnitModal')?.classList.add('open');
+  setTimeout(() => (codeInput?.disabled ? nameInput : codeInput)?.focus(), 50);
+}
+
+function closeCustomUnitModal() {
+  editingCustomCode = null;
+  const codeInput = document.getElementById('customUnitCode');
+  if (codeInput) codeInput.disabled = false;
+  document.getElementById('customUnitModal')?.classList.remove('open');
+}
+
+async function doSaveCustomUnit() {
+  const codeInput = document.getElementById('customUnitCode');
+  const nameInput = document.getElementById('customUnitName');
+  const code      = (codeInput?.value || '').trim().toUpperCase();
+  const name      = (nameInput?.value || '').trim();
+
+  if (!code) { toast('Enter a unit code', 'error'); return; }
+  if (!name) { toast('Enter a unit name', 'error'); return; }
+
+  const sems     = [...document.querySelectorAll('#customUnitSemBtns .sem-btn.on')].map(b => b.dataset.sem);
+  const sessions = getCustomSessionRows();
+
+  // Duplicate name check
+  const dup = allCourses.find(c => c.custom && c.name === name && c.code !== code);
+  if (dup) { toast(`A custom unit named "${name}" already exists`, 'error'); return; }
+
+  const isEdit = !!editingCustomCode;
+
+  try {
+    await API.saveCustomCourse({ code, name, sems, sessions });
+
+    if (isEdit) {
+      const idx = allCourses.findIndex(c => c.code === code);
+      if (idx !== -1) allCourses[idx] = { ...allCourses[idx], name, sems, sessions };
+      toast(`${code} updated`, 'success');
+    } else {
+      if (!allCourses.find(c => c.code === code)) {
+        allCourses.push({ code, name, faculty: 'Custom', sems, sessions, alternatives: [], custom: true });
+      }
+      if (!selected.find(s => s.code === code)) {
+        selected = [...selected, { code, altIdx: 0 }];
+        await saveAndRefresh();
+      }
+      toast(`${code} added`, 'success');
+    }
+
+    closeCustomUnitModal();
+    renderUI();
+    updateNavBadge(selected.length);
+  } catch {
+    toast('Could not save unit', 'error');
+  }
+}
+
+function bindCustomUnitModal() {
+  document.getElementById('cancelCustomUnitBtn')?.addEventListener('click', closeCustomUnitModal);
+  document.getElementById('confirmCustomUnitBtn')?.addEventListener('click', doSaveCustomUnit);
+  document.getElementById('customUnitAddSessionBtn')?.addEventListener('click', () => {
+    document.getElementById('customUnitSessionList')?.appendChild(makeCustomSessionRow(true));
+  });
+  document.getElementById('customUnitModal')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('customUnitModal')) closeCustomUnitModal();
+  });
+  document.querySelectorAll('#customUnitSemBtns .sem-btn').forEach(btn => {
+    btn.addEventListener('click', () => btn.classList.toggle('on'));
+  });
 }

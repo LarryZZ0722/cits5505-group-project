@@ -82,3 +82,30 @@ def delete_custom_course(code):
     CustomCourse.query.filter_by(user_id=user.id, code=code.upper()).delete()
     db.session.commit()
     return ok()
+
+
+@courses_bp.put('/api/courses/custom/<code>')
+@jwt_required()
+def update_custom_course(code):
+    """Update name, sems, and sessions of an existing custom unit (issue #23)."""
+    user = current_user()
+    data = request.get_json(silent=True) or {}
+    row  = CustomCourse.query.filter_by(user_id=user.id, code=code.upper()).first()
+    if not row:
+        return err('Custom unit not found', 404)
+    new_name = (data.get('name') or '').strip()
+    if not new_name:
+        return err('Unit name is required')
+    # Prevent duplicate names across this user's custom units
+    dup = CustomCourse.query.filter(
+        CustomCourse.user_id == user.id,
+        CustomCourse.name    == new_name,
+        CustomCourse.code    != code.upper()
+    ).first()
+    if dup:
+        return err(f'You already have a custom unit named "{new_name}"')
+    row.name     = new_name
+    row.sems     = _json.dumps(data.get('sems',     _json.loads(row.sems)))
+    row.sessions = _json.dumps(data.get('sessions', _json.loads(row.sessions)))
+    db.session.commit()
+    return jsonify(row.to_dict())
