@@ -58,48 +58,134 @@ def detect_conflicts(selected: list, courses: list) -> set:
 
 def run_auto_schedule(selected: list, courses: list, prefs: dict) -> list:
     """
-    Improved auto-scheduler (fix for issue #9) — runs multiple passes
-    until no further improvement is found, preventing one unit's fix
-    from causing a clash in another.
-    Kalp Prajapati (25073034)
-    """
-    avoid_8am    = prefs.get('avoid8am', False)
-    compact_days = prefs.get('compactDays', False)
-    free_fridays = prefs.get('freeFridays', False)
+    Auto-scheduler with weighted, priority-ranked preferences (issue #24).
 
+    New preferences format
+    ──────────────────────
+    earliestStart       int  (8–12)  — no sessions before this hour
+    maxConsecutiveHours int  (1–6)   — cap on back-to-back class hours per day
+    targetDaysOff       list[str]    — e.g. ["Friday", "Monday"]
+    compactDays         bool         — prefer sessions on already-used days
+    priorities          list[str]    — ordered from most to least important:
+                                       ["targetDaysOff","earliestStart",
+                                        "maxConsecutive","compactDays"]
+
+    Backward-compatible with old format
+    ─────────────────────────────────────
+    avoid8am    bool → treated as earliestStart = 9
+    freeFridays bool → treated as targetDaysOff = ["Friday"]
+    """
+    # ── Parse preferences (new + legacy) ─────────────────────────────────────
+    earliest_start = prefs.get('earliestStart',
+                               9 if prefs.get('avoid8am') else 8)
+
+    max_consecutive = int(prefs.get('maxConsecutiveHours', 6))
+    compact_days    = bool(prefs.get('compactDays', False))
+
+    _DAY_TO_INT = {
+        'Monday': 0, 'Mon': 0, 'Tuesday': 1, 'Tue': 1,
+        'Wednesday': 2, 'Wed': 2, 'Thursday': 3, 'Thu': 3,
+        'Friday': 4, 'Fri': 4,
+    }
+    raw_days_off   = list(prefs.get('targetDaysOff', []))
+    if prefs.get('freeFridays') and 'Friday' not in raw_days_off and 'Fri' not in raw_days_off:
+        raw_days_off.append('Friday')
+    target_days_off = {_DAY_TO_INT[d] for d in raw_days_off if d in _DAY_TO_INT}
+
+    # ── Priority weights (rank 0 = most important → highest multiplier) ───────
+    PREF_KEYS       = ['targetDaysOff', 'earliestStart', 'maxConsecutive', 'compactDays']
+    user_priorities = prefs.get('priorities', PREF_KEYS)
+
+    def _weight(key: str) -> int:
+        try:
+            rank = user_priorities.index(key)
+        except ValueError:
+            rank = len(PREF_KEYS) - 1
+        # rank 0 → weight 8, rank 1 → 4, rank 2 → 2, rank 3 → 1
+        return 2 ** (len(PREF_KEYS) - 1 - rank)
+
+    w_days_off  = _weight('targetDaysOff')
+    w_earliest  = _weight('earliestStart')
+    w_consec    = _weight('maxConsecutive')
+    w_compact   = _weight('compactDays')
+
+    # ── Per-day consecutive-hours penalty ─────────────────────────────────────
+    def _consecutive_penalty(all_sessions: list) -> float:
+        """Return total penalty for exceeding max_consecutive on any day."""
+        by_day: dict = {}
+        for s in all_sessions:
+            by_day.setdefault(s['day'], []).append(s)
+        penalty = 0.0
+        for day_sess in by_day.values():
+            sorted_s  = sorted(day_sess, key=lambda x: x['hour'])
+            cur_end   = 0
+            cur_block = 0
+            for s in sorted_s:
+                if s['hour'] <= cur_end:          # adjacent / overlapping
+                    cur_block += s['hour'] + s['duration'] - cur_end
+                    cur_end    = s['hour'] + s['duration']
+                else:                             # gap → reset
+                    cur_block  = s['duration']
+                    cur_end    = s['hour'] + s['duration']
+                if cur_block > max_consecutive:
+                    penalty += (cur_block - max_consecutive) * 3
+        return penalty
+
+    # ── Scoring function ──────────────────────────────────────────────────────
     def score(entry_index: int, alt: int, current: list) -> float:
-        test    = [dict(e) for e in current]
+        test = [dict(e) for e in current]
         test[entry_index]['altIdx'] = alt
-        course  = next((c for c in courses if c['code'] == test[entry_index]['code']), None)
+
+        course = next((c for c in courses if c['code'] == test[entry_index]['code']), None)
         if not course:
             return float('inf')
-        sessions    = get_active_sessions(course, alt)
-        n_clash     = len(detect_conflicts(test, courses))
-        pen_8am     = 10 if avoid_8am    and any(s['hour'] == 8 for s in sessions) else 0
-        pen_fri     = 10 if free_fridays and any(s['day']  == 4 for s in sessions) else 0
+        sessions = get_active_sessions(course, alt)
 
-        # compact_days: prefer slots on days already used by other units
+        # 1. Conflict count (absolute priority — always dominates)
+        n_clash = len(detect_conflicts(test, courses))
+
+        # 2. Earliest-start penalty: proportional to how early the session is
+        pen_earliest = sum(max(0, earliest_start - s['hour']) * 4
+                           for s in sessions if s['hour'] < earliest_start)
+
+        # 3. Target-days-off penalty
+        pen_days_off = sum(5 for s in sessions if s['day'] in target_days_off)
+
+        # 4. Consecutive-hours penalty (whole schedule after applying this alt)
+        all_sessions: list = []
+        for j, entry in enumerate(test):
+            c = next((x for x in courses if x['code'] == entry['code']), None)
+            if c:
+                all_sessions.extend(get_active_sessions(c, entry.get('altIdx', 0)))
+        pen_consec = _consecutive_penalty(all_sessions)
+
+        # 5. Compact-days penalty
         if compact_days:
-            other_days = set()
+            other_days: set = set()
             for j, other in enumerate(current):
                 if j == entry_index:
                     continue
-                other_course = next((c for c in courses if c['code'] == other['code']), None)
-                if other_course:
-                    for s in get_active_sessions(other_course, other.get('altIdx', 0)):
+                oc = next((c for c in courses if c['code'] == other['code']), None)
+                if oc:
+                    for s in get_active_sessions(oc, other.get('altIdx', 0)):
                         other_days.add(s['day'])
-            pen_compact = len({s['day'] for s in sessions} - other_days) * 5
+            pen_compact = len({s['day'] for s in sessions} - other_days) * 2
         else:
             pen_compact = 0
 
-        return n_clash * 100 + pen_8am + pen_fri + pen_compact
+        # Weighted sum of soft penalties (conflict penalty is hard and always wins)
+        soft = (w_days_off * pen_days_off +
+                w_earliest * pen_earliest +
+                w_consec   * pen_consec   +
+                w_compact  * pen_compact)
 
+        return n_clash * 10_000 + soft
+
+    # ── Multi-pass optimisation ────────────────────────────────────────────────
     result = [dict(e) for e in selected]
 
-    # Multi-pass loop — keep improving until nothing changes
     for _ in range(10):
         improved = False
-
         for i, entry in enumerate(result):
             course = next((c for c in courses if c['code'] == entry['code']), None)
             if not course:
@@ -117,7 +203,7 @@ def run_auto_schedule(selected: list, courses: list, prefs: dict) -> list:
 
             if best_alt != result[i].get('altIdx', 0):
                 result[i]['altIdx'] = best_alt
-                improved = True
+                improved            = True
 
         if not improved:
             break

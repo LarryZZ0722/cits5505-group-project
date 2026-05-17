@@ -16,10 +16,12 @@ let selected      = [];
 let activeSems    = ["S1", "S2"];
 let tablePage     = 0;
 const PAGE_SIZE   = 8;
+let editingCode   = null;  // code of custom unit being edited (issue #23)
 
 document.addEventListener("DOMContentLoaded", async () => {
   const loggedIn = !!State.getUser();
 
+  renderCourseTableSkeleton();
   if (!loggedIn) {
     document.getElementById("basketCard")?.style.setProperty("display", "none");
     document.getElementById("manualCard")?.style.setProperty("display", "none");
@@ -36,6 +38,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   bindFilters();
   bindSearch();
   if (loggedIn) bindManualAdd();
+  if (loggedIn) bindEditModal();
   renderTable();
   if (loggedIn) renderBasket();
 });
@@ -274,6 +277,36 @@ function getFilteredCourses() {
 }
 
 /* ── Table ───────────────────────────────── */
+
+function renderCourseTableSkeleton() {
+  const tbody = document.getElementById("courseTableBody");
+  if (!tbody) return;
+
+  tbody.innerHTML = Array.from({ length: PAGE_SIZE }, () => `
+    <tr class="skeleton-row">
+      <td><div class="skeleton skeleton-code"></div></td>
+      <td>
+        <div class="skeleton skeleton-title"></div>
+        <div class="skeleton skeleton-subtitle"></div>
+      </td>
+      <td><div class="skeleton skeleton-pill"></div></td>
+      <td>
+        <div class="flex flex-wrap gap-1">
+          <div class="skeleton skeleton-tag"></div>
+          <div class="skeleton skeleton-tag"></div>
+        </div>
+      </td>
+      <td><div class="skeleton skeleton-button"></div></td>
+    </tr>
+  `).join("");
+
+  const tableCount = document.getElementById("tableCount");
+  if (tableCount) tableCount.textContent = "Loading units...";
+
+  const pagination = document.getElementById("pagination");
+  if (pagination) pagination.innerHTML = "";
+}
+
 function renderTable() {
   const courses = getFilteredCourses();
   const slice   = courses;
@@ -286,6 +319,9 @@ function renderTable() {
 
   tbody.querySelectorAll(".add-row-btn").forEach(btn => {
     btn.addEventListener("click", () => toggleCourse(btn.dataset.code));
+  });
+  tbody.querySelectorAll(".edit-custom-btn").forEach(btn => {
+    btn.addEventListener("click", () => openEditModal(btn.dataset.code));
   });
 
   document.getElementById("tableCount").textContent =`${totalCourses} unit${totalCourses !== 1 ? "s" : ""}`;
@@ -318,10 +354,13 @@ function buildTableRow(c) {
     <td><div class="flex flex-wrap gap-1">${sems}</div></td>
     <td><div class="flex flex-wrap gap-1">${tags}</div></td>
     <td>
-      <button class="add-row-btn ${isAdded ? "added" : ""}" data-code="${c.code}"
-        title="${isAdded ? "Remove from selection" : "Add to selection"}">
-        ${isAdded ? "✓" : "+"}
-      </button>
+      <div class="flex gap-1 items-center justify-end">
+        ${c.custom ? `<button class="edit-custom-btn text-[var(--text3)] hover:text-[var(--accent)] bg-transparent border-0 cursor-pointer text-[12px] px-1" data-code="${c.code}" title="Edit unit">✏</button>` : ''}
+        <button class="add-row-btn ${isAdded ? "added" : ""}" data-code="${c.code}"
+          title="${isAdded ? "Remove from selection" : "Add to selection"}">
+          ${isAdded ? "✓" : "+"}
+        </button>
+      </div>
     </td>
   </tr>`;
 }
@@ -373,61 +412,68 @@ async function toggleCourse(code) {
     return;
   }
 
-  const previousSelected = [...selected];
-  const previousCourses = [...allCourses];
-
   const wasAdded = selected.some(x => x.code === code);
+  const course = allCourses.find(c => c.code === code);
 
   if (wasAdded) {
+    const previousSelected = [...selected];
+
     selected = selected.filter(x => x.code !== code);
-
-    const course = allCourses.find(c => c.code === code);
-    if (course?.custom) {
-      allCourses = allCourses.filter(c => c.code !== code);
-    }
-  } else {
-    selected = [...selected, { code, altIdx: 0 }];
-  }
-
-  patchTableRow(code, !wasAdded);
-  renderBasket();
-
-  const saved = await saveSelected();
-
-  if (!saved) {
-    selected = previousSelected;
-    allCourses = previousCourses;
-
-    patchTableRow(code, wasAdded);
+    patchTableRow(code, false);
     renderBasket();
     updateNavBadge(selected.length);
 
-    toast(
-      wasAdded
-        ? `Could not remove ${code}. Please check your connection and try again.`
-        : `Could not add ${code}. Please check your connection and try again.`,
-      "error"
-    );
+    const saved = await saveSelected();
 
-    return;
-  }
-
-  if (wasAdded) {
-    const course = previousCourses.find(c => c.code === code);
+    if (!saved) {
+      selected = previousSelected;
+      patchTableRow(code, true);
+      renderBasket();
+      updateNavBadge(selected.length);
+      toast(`Could not remove ${code}. Please try again.`, "error");
+      return;
+    }
 
     if (course?.custom) {
       try {
         await API.deleteCustomCourse(code);
+
+        allCourses = allCourses.filter(c => c.code !== code);
+        renderTable();
       } catch (e) {
         console.error("deleteCustomCourse failed:", e);
-        toast(`Removed ${code}, but could not delete the custom unit`, "error");
+
+        selected = previousSelected;
+        patchTableRow(code, true);
+        renderBasket();
+        updateNavBadge(selected.length);
+
+        toast(`Could not delete ${code}. Please try again.`, "error");
+        return;
       }
     }
 
     toast(`${code} removed`);
-  } else {
-    toast(`${code} added`, "success");
+    return;
   }
+
+  selected = [...selected, { code, altIdx: 0 }];
+  patchTableRow(code, true);
+  renderBasket();
+  updateNavBadge(selected.length);
+
+  const saved = await saveSelected();
+
+  if (!saved) {
+    selected = selected.filter(x => x.code !== code);
+    patchTableRow(code, false);
+    renderBasket();
+    updateNavBadge(selected.length);
+    toast(`Could not add ${code}. Please try again.`, "error");
+    return;
+  }
+
+  toast(`${code} added`, "success");
 }
 
 function patchTableRow(code, isAdded) {
@@ -456,18 +502,25 @@ function renderBasket() {
   body.innerHTML = `<div class="divide-y divide-[var(--border)]">${selected.map(({ code }, i) => {
     const c   = allCourses.find(x => x.code === code);
     const col = getColor(i);
+    const editBtn = c?.custom
+      ? `<button class="w-5 h-5 rounded flex items-center justify-center border-0 bg-transparent text-[var(--text3)] text-[11px] cursor-pointer hover:text-[var(--accent)] hover:bg-[var(--accent-glow)] flex-shrink-0 edit-custom-btn" data-code="${code}" aria-label="Edit ${code}" title="Edit unit">✏</button>`
+      : '';
     return `<div class="flex items-center gap-3 px-4 py-2.5">
       <div class="w-2 h-2 rounded-full flex-shrink-0" style="background:${col.border}"></div>
       <div class="flex-1 min-w-0">
         <div class="font-mono text-[11px] font-semibold text-[var(--text)]">${code}</div>
         <div class="text-[10px] text-[var(--text3)] truncate">${c ? c.name : "Custom unit"}</div>
       </div>
+      ${editBtn}
       <button class="w-5 h-5 rounded flex items-center justify-center border-0 bg-transparent text-[var(--text3)] text-[14px] cursor-pointer hover:text-[var(--red)] hover:bg-[var(--red-bg)] flex-shrink-0 rm-btn" data-code="${code}" aria-label="Remove ${code}">×</button>
     </div>`;
   }).join("")}</div>`;
 
   body.querySelectorAll(".rm-btn").forEach(btn => {
     btn.addEventListener("click", () => toggleCourse(btn.dataset.code));
+  });
+  body.querySelectorAll(".edit-custom-btn").forEach(btn => {
+    btn.addEventListener("click", () => openEditModal(btn.dataset.code));
   });
 }
 
@@ -563,4 +616,123 @@ async function addManual() {
 /* ── Helpers ─────────────────────────────── */
 function escHtml(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+/* ── Edit custom unit modal (issue #23) ──── */
+function makeEditSessionRow(removable) {
+  const row = document.createElement("div");
+  row.className = "session-row flex gap-1 items-center";
+  row.innerHTML = `
+    <select class="sess-type sess-input">
+      <option>LEC</option><option>TUT</option><option>LAB</option>
+    </select>
+    <select class="sess-day sess-input">
+      <option value="0">Mon</option><option value="1">Tue</option>
+      <option value="2">Wed</option><option value="3">Thu</option>
+      <option value="4">Fri</option>
+    </select>
+    <input type="number" class="sess-start sess-input sess-num" min="8" max="19" value="9" title="Start hour">
+    <span class="sess-sep">–</span>
+    <input type="number" class="sess-end sess-input sess-num" min="9" max="20" value="11" title="End hour">
+    ${removable ? '<button type="button" class="sess-rm" aria-label="Remove row">×</button>' : ''}
+  `;
+  if (removable) row.querySelector(".sess-rm").addEventListener("click", () => row.remove());
+  return row;
+}
+
+function fillEditSessionRows(sessions) {
+  const list = document.getElementById("editSessionList");
+  if (!list) return;
+  list.innerHTML = "";
+  const rows = sessions.length ? sessions : [{ type: "LEC", day: 0, hour: 9, duration: 2 }];
+  rows.forEach((s, i) => {
+    const row = makeEditSessionRow(i > 0);
+    row.querySelector(".sess-type").value  = s.type  || "LEC";
+    row.querySelector(".sess-day").value   = String(s.day   ?? 0);
+    row.querySelector(".sess-start").value = String(s.hour  ?? 9);
+    row.querySelector(".sess-end").value   = String((s.hour ?? 9) + (s.duration ?? 2));
+    list.appendChild(row);
+  });
+}
+
+function getEditSessionRows() {
+  return [...document.querySelectorAll("#editSessionList .session-row")].map(row => {
+    const start = parseInt(row.querySelector(".sess-start").value);
+    const end   = parseInt(row.querySelector(".sess-end").value);
+    return {
+      type:     row.querySelector(".sess-type").value,
+      day:      parseInt(row.querySelector(".sess-day").value),
+      hour:     start,
+      duration: Math.max(1, end - start),
+    };
+  }).filter(s => s.duration > 0);
+}
+
+function openEditModal(code) {
+  const course = allCourses.find(c => c.code === code);
+  if (!course) return;
+  editingCode = code;
+
+  const nameInput = document.getElementById("editCustomName");
+  if (nameInput) nameInput.value = course.name;
+
+  // Set semester buttons
+  document.querySelectorAll("#editSemBtns .sem-btn").forEach(btn => {
+    btn.classList.toggle("on", course.sems.includes(btn.dataset.sem));
+  });
+
+  fillEditSessionRows(course.sessions || []);
+  document.getElementById("editCustomModal")?.classList.add("open");
+  setTimeout(() => nameInput?.focus(), 50);
+}
+
+function closeEditModal() {
+  editingCode = null;
+  document.getElementById("editCustomModal")?.classList.remove("open");
+}
+
+async function doSaveEdit() {
+  if (!editingCode) return;
+  const newName = document.getElementById("editCustomName")?.value.trim();
+  if (!newName) { toast("Enter a unit name", "error"); return; }
+
+  // Client-side duplicate name check
+  const dup = allCourses.find(c => c.custom && c.name === newName && c.code !== editingCode);
+  if (dup) { toast(`A custom unit named "${newName}" already exists`, "error"); return; }
+
+  const sems     = [...document.querySelectorAll("#editSemBtns .sem-btn.on")].map(b => b.dataset.sem);
+  const sessions = getEditSessionRows();
+  const code     = editingCode;
+
+  try {
+    const updated = await API.saveCustomCourse({ code, name: newName, sems, sessions });
+    // Update in-memory course list
+    const idx = allCourses.findIndex(c => c.code === code);
+    if (idx !== -1) allCourses[idx] = { ...allCourses[idx], name: newName, sems, sessions };
+    closeEditModal();
+    renderBasket();
+    renderTable();
+    toast(`${code} updated`, "success");
+  } catch (e) {
+    toast("Could not save changes", "error");
+  }
+}
+
+function bindEditModal() {
+  document.getElementById("cancelEditBtn")?.addEventListener("click", closeEditModal);
+  document.getElementById("confirmEditBtn")?.addEventListener("click", doSaveEdit);
+  document.getElementById("editAddSessionBtn")?.addEventListener("click", () => {
+    const row = makeEditSessionRow(true);
+    document.getElementById("editSessionList")?.appendChild(row);
+  });
+  document.getElementById("editCustomModal")?.addEventListener("click", e => {
+    if (e.target === document.getElementById("editCustomModal")) closeEditModal();
+  });
+  document.getElementById("editCustomName")?.addEventListener("keydown", e => {
+    if (e.key === "Enter") doSaveEdit();
+    if (e.key === "Escape") closeEditModal();
+  });
+  document.querySelectorAll("#editSemBtns .sem-btn").forEach(btn => {
+    btn.addEventListener("click", () => btn.classList.toggle("on"));
+  });
 }

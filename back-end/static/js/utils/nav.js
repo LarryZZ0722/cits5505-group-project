@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════
    nav.js — Navigation helpers
+   Fix issue #40: Logout now clears httpOnly cookie
 ═══════════════════════════════════════════ */
 
 import State from "./state.js";
@@ -26,11 +27,23 @@ function renderNavUser() {
       </a>
       <a href="/" class="btn btn-ghost btn-sm hidden md:inline-flex" id="logoutBtn">Log out</a>`;
 
-    document.getElementById("logoutBtn")?.addEventListener("click", (e) => {
-      e.preventDefault();
-      State.clearUser();
-      window.location.href = "/";
-    });
+    document
+      .getElementById("logoutBtn")
+      ?.addEventListener("click", async (e) => {
+        e.preventDefault();
+        try {
+          // Call logout API to clear the httpOnly cookie (closes #40)
+          await fetch("/api/auth/logout", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+          });
+        } catch (_) {
+          // Even if request fails, clear local state and redirect
+        }
+        State.clearUser();
+        window.location.href = "/";
+      });
   } else {
     right.innerHTML = `
       <a href="/auth" class="btn btn-sm hidden md:inline-flex">Log in</a>

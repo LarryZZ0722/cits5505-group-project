@@ -21,7 +21,7 @@ A web application that helps University of Western Australia students plan their
 |--------|------|-----------------|
 | 24701844 | Thanh Hung Nguyen | 24701844 |
 | 23456790 | Zicheng Zeng | 24728085 |
-| 23456791 | Student Three | github-username-3 |
+| 24692035 | Chris Sajimon Joseph | ChrisSajimon |
 | 23456792 | Student Four | github-username-4 |
 
 ---
@@ -154,7 +154,27 @@ All demo accounts use password `demo1234`.
 
 ## Running the tests
 
+## Running Tests
+ 
+### Install dependencies
+```bash
+pip install -r requirements.txt
+```
+ 
+### Unit tests (fast, no browser needed)
 ```bash
 cd back-end
-python -m pytest
+pytest tests/test_unit.py -v
+```
+ 
+### Selenium end-to-end tests (requires Chrome)
+Start the server first in a separate terminal:
+```bash
+cd back-end
+python app.py
+```
+ 
+Then run:
+```bash
+pytest back-end/tests/test_selenium.py -v
 ```
