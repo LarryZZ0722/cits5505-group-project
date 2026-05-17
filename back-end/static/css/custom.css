@@ -358,3 +358,43 @@ button, input, select, textarea { font-family:var(--sans); }
 .skeleton-card-session.short {
   width: 160px;
 }
+
+/* ── Pagination controls ─────────────────── */
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.page-nav-btn {
+  min-width: 86px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  background: var(--bg2);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+}
+
+.page-nav-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent-glow);
+}
+
+.page-nav-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.page-status {
+  min-width: 92px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text2);
+}
