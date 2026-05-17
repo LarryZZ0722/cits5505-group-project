@@ -154,7 +154,27 @@ All demo accounts use password `demo1234`.
 
 ## Running the tests
 
+## Running Tests
+ 
+### Install dependencies
+```bash
+pip install -r requirements.txt
+```
+ 
+### Unit tests (fast, no browser needed)
 ```bash
 cd back-end
-python -m pytest
+pytest tests/test_unit.py -v
+```
+ 
+### Selenium end-to-end tests (requires Chrome)
+Start the server first in a separate terminal:
+```bash
+cd back-end
+python app.py
+```
+ 
+Then run:
+```bash
+pytest back-end/tests/test_selenium.py -v
 ```
