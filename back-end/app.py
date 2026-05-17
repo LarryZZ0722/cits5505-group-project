@@ -38,7 +38,7 @@ from stats import stats_bp
 # ── App & config ──────────────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-app = Flask(__name__)  # templates/ and static/ live inside back-end/ by convention
+app = Flask(__name__)
 app.config.update(
     SECRET_KEY                     = os.environ.get('SECRET_KEY', 'dev-secret-change-in-production'),
     SQLALCHEMY_DATABASE_URI        = f'sqlite:///{os.path.join(BASE_DIR, "planner.db")}',
@@ -64,7 +64,7 @@ _CSRF_EXEMPT = ('/api/auth/login', '/api/auth/register', '/api/health')
 
 @app.before_request
 def check_csrf():
-    if app.testing:                          # skip in unit tests
+    if app.testing:
         return
     if request.method not in ('POST', 'PUT', 'PATCH', 'DELETE'):
         return
@@ -131,8 +131,11 @@ def invalid_token(_):
 def expired_token(*_):
     return err('Token expired — please log in again', 401)
 
+# ── Debug endpoint — gated behind debug mode (closes #37) ─────────────
 @app.get('/api/debug/seed')
 def debug_seed():
+    if not app.debug:
+        return err('Not found', 404)
     rows = []
     for u in User.query.all():
         for tt in u.timetables:
