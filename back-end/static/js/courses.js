@@ -10,6 +10,7 @@ import { updateNavBadge } from "./utils/nav.js";
 import "./utils/components.js";
 
 let allCourses    = [];
+let totalCourses  = 0;
 let allTimetables = [];
 let selected      = [];
 let activeSems    = ["S1", "S2"];
@@ -42,21 +43,74 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (loggedIn) renderBasket();
 });
 
+function renderCourseTableSkeleton() {
+  const tbody = document.getElementById("courseTableBody");
+  if (!tbody) return;
+
+  tbody.innerHTML = Array.from({ length: PAGE_SIZE }, () => `
+    <tr class="skeleton-row">
+      <td><div class="skeleton skeleton-code"></div></td>
+      <td>
+        <div class="skeleton skeleton-title"></div>
+        <div class="skeleton skeleton-subtitle"></div>
+      </td>
+      <td><div class="skeleton skeleton-pill"></div></td>
+      <td>
+        <div class="flex flex-wrap gap-1">
+          <div class="skeleton skeleton-tag"></div>
+          <div class="skeleton skeleton-tag"></div>
+        </div>
+      </td>
+      <td><div class="skeleton skeleton-button"></div></td>
+    </tr>
+  `).join("");
+
+  const tableCount = document.getElementById("tableCount");
+  if (tableCount) tableCount.textContent = "Loading units...";
+
+  const pagination = document.getElementById("pagination");
+  if (pagination) pagination.innerHTML = "";
+}
+
+
 /* ── Data ────────────────────────────────── */
 async function loadCourses() {
+  renderCourseTableSkeleton();
+
   try {
-    allCourses = await API.getCourses();
+    const search = document.getElementById("unitSearch")?.value || "";
+    const semester = activeSems.length === 1 ? activeSems[0] : "";
+
+    const result = await API.getCourses({
+      page: tablePage,
+      pageSize: PAGE_SIZE,
+      semester,
+      search,
+    });
+
+    allCourses = result.items || [];
+    totalCourses = result.total || 0;
+
+    if (State.getUser()) {
+      try {
+        const custom = await API.getCustomCourses();
+
+        custom.forEach(c => {
+          if (!allCourses.find(x => x.code === c.code)) {
+            allCourses.push(c);
+          }
+        });
+      } catch (customErr) {
+        console.error("Could not load custom courses:", customErr);
+      }
+    }
   } catch (err) {
-    console.error(err);
+    console.error("Could not load unit data:", err);
     toast("Could not load unit data", "error");
-  }
-  if (State.getUser()) {
-    try {
-      const custom = await API.getCustomCourses();
-      custom.forEach(c => {
-        if (!allCourses.find(x => x.code === c.code)) allCourses.push(c);
-      });
-    } catch {}
+    allCourses = [];
+    totalCourses = 0;
+  } finally {
+    renderTable();
   }
 }
 
@@ -198,29 +252,28 @@ function bindFilters() {
     chip.addEventListener("click", () => {
       chip.classList.toggle("on");
       activeSems = [...document.querySelectorAll(".filter-chip[data-sem].on")].map(c => c.dataset.sem);
-      tablePage  = 0;
-      renderTable();
+      tablePage = 0;
+      loadCourses();
     });
   });
   document.getElementById("facultyFilter")?.addEventListener("change", () => { tablePage = 0; renderTable(); });
 }
 
 function bindSearch() {
+  let searchTimer;
+
   document.getElementById("unitSearch")?.addEventListener("input", () => {
-    tablePage = 0;
-    renderTable();
+    clearTimeout(searchTimer);
+
+    searchTimer = setTimeout(() => {
+      tablePage = 0;
+      loadCourses();
+    }, 300);
   });
 }
 
 function getFilteredCourses() {
-  const q = (document.getElementById("unitSearch")?.value || "").toLowerCase();
-  const faculty = document.getElementById("facultyFilter")?.value || "";
-  return allCourses.filter((c) => {
-    const facultyOk = !faculty || c.faculty === faculty;
-    const semOk = activeSems.length === 0 || c.sems.some(s => activeSems.includes(s));
-    const qOk   = !q || c.code.toLowerCase().includes(q) || c.name.toLowerCase().includes(q) || c.faculty.toLowerCase().includes(q);
-    return semOk && facultyOk && qOk;
-  });
+  return allCourses;
 }
 
 /* ── Table ───────────────────────────────── */
@@ -256,8 +309,7 @@ function renderCourseTableSkeleton() {
 
 function renderTable() {
   const courses = getFilteredCourses();
-  const start   = tablePage * PAGE_SIZE;
-  const slice   = courses.slice(start, start + PAGE_SIZE);
+  const slice   = courses;
   const tbody   = document.getElementById("courseTableBody");
   if (!tbody) return;
 
@@ -272,8 +324,8 @@ function renderTable() {
     btn.addEventListener("click", () => openEditModal(btn.dataset.code));
   });
 
-  document.getElementById("tableCount").textContent = `${courses.length} unit${courses.length !== 1 ? "s" : ""}`;
-  renderPagination(courses.length);
+  document.getElementById("tableCount").textContent =`${totalCourses} unit${totalCourses !== 1 ? "s" : ""}`;
+  renderPagination(totalCourses);
 }
 
 const TYPE_TAG_CLS = {
@@ -316,13 +368,40 @@ function buildTableRow(c) {
 /* ── Pagination ──────────────────────────── */
 function renderPagination(total) {
   const pages = Math.ceil(total / PAGE_SIZE);
-  const el    = document.getElementById("pagination");
+  const el = document.getElementById("pagination");
   if (!el) return;
-  el.innerHTML = Array.from({ length: pages }, (_, i) =>
-    `<button class="page-btn ${i === tablePage ? "current" : ""}" data-page="${i}">${i + 1}</button>`
-  ).join("");
-  el.querySelectorAll(".page-btn").forEach(btn => {
-    btn.addEventListener("click", () => { tablePage = parseInt(btn.dataset.page); renderTable(); });
+
+  if (pages <= 1) {
+    el.innerHTML = "";
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="pagination-controls">
+      <button class="page-nav-btn" id="prevPageBtn" ${tablePage === 0 ? "disabled" : ""}>
+        ← Prev
+      </button>
+
+      <span class="page-status">
+        Page ${tablePage + 1} of ${pages}
+      </span>
+
+      <button class="page-nav-btn" id="nextPageBtn" ${tablePage >= pages - 1 ? "disabled" : ""}>
+        Next →
+      </button>
+    </div>
+  `;
+
+  document.getElementById("prevPageBtn")?.addEventListener("click", async () => {
+    if (tablePage === 0) return;
+    tablePage -= 1;
+    await loadCourses();
+  });
+
+  document.getElementById("nextPageBtn")?.addEventListener("click", async () => {
+    if (tablePage >= pages - 1) return;
+    tablePage += 1;
+    await loadCourses();
   });
 }
 

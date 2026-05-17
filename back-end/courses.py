@@ -26,12 +26,37 @@ def get_courses():
 
     if semester:
         courses = [c for c in courses if semester in c.get('sems', [])]
+
     if faculty:
         courses = [c for c in courses if c.get('faculty') == faculty]
+
     if search:
-        courses = [c for c in courses if search in c.get('code', '').lower()
-                                      or search in c.get('name', '').lower()]
-    return jsonify(courses)
+        courses = [
+            c for c in courses
+            if search in c.get('code', '').lower()
+            or search in c.get('name', '').lower()
+            or search in c.get('faculty', '').lower()
+        ]
+
+    if 'page' not in request.args and 'pageSize' not in request.args:
+        return jsonify(courses)
+
+    page      = request.args.get('page', 0, type=int)
+    page_size = request.args.get('pageSize', 8, type=int)
+
+    page = max(page, 0)
+    page_size = max(1, min(page_size, 50))
+
+    total = len(courses)
+    start = page * page_size
+    end   = start + page_size
+
+    return jsonify({
+        'items': courses[start:end],
+        'total': total,
+        'page': page,
+        'pageSize': page_size,
+    })
 
 
 @courses_bp.get('/api/courses/<code>')
