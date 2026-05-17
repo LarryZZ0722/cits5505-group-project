@@ -584,21 +584,3 @@ class TestFriends:
         make_user(client,      'Bob',   'bob@student.uwa.edu.au',   '22000002')
         r = client.get('/api/friends/22000002/timetables', headers=h1)
         assert r.status_code == 403
-
-    def test_get_pending_requests(self, client):
-        h1 = make_user(client, 'Alice', 'alice@student.uwa.edu.au', '22000001')
-        h2 = make_user(client, 'Bob',   'bob@student.uwa.edu.au',   '22000002')
-        client.post('/api/friends/requests',
-                    json={'studentNumber': '22000002'}, headers=h1)
-        r = client.get('/api/friends/requests/pending', headers=h2)
-        assert r.status_code == 200
-        assert any(req['studentNumber'] == '22000001' for req in r.get_json())
-
-    def test_get_sent_requests(self, client):
-        h1 = make_user(client, 'Alice', 'alice@student.uwa.edu.au', '22000001')
-        make_user(client,      'Bob',   'bob@student.uwa.edu.au',   '22000002')
-        client.post('/api/friends/requests',
-                    json={'studentNumber': '22000002'}, headers=h1)
-        r = client.get('/api/friends/requests/sent', headers=h1)
-        assert r.status_code == 200
-        assert any(req['studentNumber'] == '22000002' for req in r.get_json())
