@@ -92,14 +92,19 @@ const API = {
      COURSES
   ════════════════════════════════════════ */
 
-  async getCourses({ semester, faculty, search } = {}) {
-    const params = new URLSearchParams();
-    if (semester) params.set('semester', semester);
-    if (faculty)  params.set('faculty',  faculty);
-    if (search)   params.set('search',   search);
-    const qs = params.toString();
-    return request(`/api/courses${qs ? '?' + qs : ''}`);
-  },
+  async getCourses({ page, pageSize, semester, faculty, search } = {}) {
+  const params = new URLSearchParams();
+
+  if (page !== undefined) params.set('page', page);
+  if (pageSize !== undefined) params.set('pageSize', pageSize);
+
+  if (semester) params.set('semester', semester);
+  if (faculty)  params.set('faculty', faculty);
+  if (search)   params.set('search', search);
+
+  const qs = params.toString();
+  return request(`/api/courses${qs ? '?' + qs : ''}`);
+},
 
   async getCourse(code) {
     return request(`/api/courses/${code}`);
