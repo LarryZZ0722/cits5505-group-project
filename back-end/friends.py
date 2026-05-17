@@ -13,13 +13,10 @@ friends.py — Friend relationships and requests
 """
 
 from flask import Blueprint, request, jsonify, current_app
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-from models import db, User, Friendship, FriendRequest
+from flask_jwt_extended import jwt_required
+from models import db, User, Friendship, FriendRequest, TimetableView
 from utils import ok, err, current_user, user_dict
-
-limiter = Limiter(key_func=get_remote_address)
+from limiter import limiter
 
 friends_bp = Blueprint('friends', __name__)
 
@@ -98,15 +95,12 @@ def send_friend_request():
         ).first()
         if forward_req:
             db.session.delete(forward_req)
-
-        # Create mutual friendship both directions
         for row in Friendship.make(user.id, recipient.id):
             existing = Friendship.query.filter_by(
                 user_id=row.user_id, friend_id=row.friend_id
             ).first()
             if not existing:
                 db.session.add(row)
-
         db.session.commit()
         return jsonify({'ok': True, 'autoAccepted': True})
 
@@ -162,19 +156,19 @@ def get_friend_timetables(student_number):
     me     = current_user()
     friend = User.query.filter_by(student_number=student_number).first()
     if not friend:
-        current_app.logger.info(f'[timetables] {student_number} not found')
         return err('User not found', 404)
     is_friend = Friendship.query.filter_by(user_id=me.id, friend_id=friend.id).first()
-    current_app.logger.info(
-        f'[timetables] me={me.student_number} friend={student_number} '
-        f'is_friend={bool(is_friend)} '
-        f'tts={[(tt.name, tt.is_public) for tt in friend.timetables]}'
-    )
     if not is_friend:
         return err('Not friends', 403)
+
     result = []
     for tt in friend.timetables:
         if tt.is_public:
+            # Log this view for issue #15
+            db.session.add(TimetableView(
+                timetable_id=tt.id,
+                viewer_id=me.id,
+            ))
             d = tt.to_dict()
             d['owner'] = {
                 'name':          friend.name,
@@ -182,4 +176,5 @@ def get_friend_timetables(student_number):
                 'studentNumber': friend.student_number,
             }
             result.append(d)
+    db.session.commit()
     return jsonify(result)
