@@ -86,7 +86,10 @@ def send_friend_request():
     ).first()
 
     if reverse_req:
+        # Delete reverse request
         db.session.delete(reverse_req)
+
+        # Also delete forward request if it somehow exists
         forward_req = FriendRequest.query.filter_by(
             sender_id=user.id, recipient_id=recipient.id
         ).first()
@@ -106,7 +109,6 @@ def send_friend_request():
         db.session.add(FriendRequest(sender_id=user.id, recipient_id=recipient.id))
         db.session.commit()
     return ok()
-
 
 @friends_bp.put('/api/friends/requests/<student_number>/accept')
 @jwt_required()
