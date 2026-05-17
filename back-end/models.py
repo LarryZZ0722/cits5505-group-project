@@ -11,7 +11,7 @@ friend_requests  — pending / declined requests
 """
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -28,14 +28,12 @@ class User(db.Model):
     email          = db.Column(db.String(120), unique=True, nullable=False)
     student_number = db.Column(db.String(8),   unique=True, nullable=False)
     password_hash  = db.Column(db.String(256), nullable=False)
-    created_at     = db.Column(db.DateTime,    default=datetime.utcnow)
+    created_at     = db.Column(db.DateTime,    default=lambda: datetime.now(timezone.utc))
 
-    # one-to-many timetables
     timetables = db.relationship(
         'Timetable', back_populates='user',
         cascade='all, delete-orphan'
     )
-    # friend requests sent / received
     sent_requests = db.relationship(
         'FriendRequest', foreign_keys='FriendRequest.sender_id',
         back_populates='sender', cascade='all, delete-orphan'
@@ -44,13 +42,11 @@ class User(db.Model):
         'FriendRequest', foreign_keys='FriendRequest.recipient_id',
         back_populates='recipient', cascade='all, delete-orphan'
     )
-    # friendships (this user's side)
     friendships = db.relationship(
         'Friendship', foreign_keys='Friendship.user_id',
         back_populates='user', cascade='all, delete-orphan'
     )
 
-    # ── helpers ──
     def set_password(self, password: str) -> None:
         self.password_hash = generate_password_hash(password)
 
@@ -71,12 +67,13 @@ class User(db.Model):
 class Timetable(db.Model):
     __tablename__ = 'timetables'
 
-    id         = db.Column(db.Integer,    primary_key=True)
-    user_id    = db.Column(db.Integer,    db.ForeignKey('users.id'), nullable=False)
+    id         = db.Column(db.Integer,     primary_key=True)
+    user_id    = db.Column(db.Integer,     db.ForeignKey('users.id'), nullable=False)
     name       = db.Column(db.String(100), default='My Timetable')
-    semester   = db.Column(db.String(4),   default='S1')   # S1 | S2 | SUM
+    semester   = db.Column(db.String(4),   default='S1')
     is_public  = db.Column(db.Boolean,     default=False)
-    updated_at = db.Column(db.DateTime,    default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = db.Column(db.DateTime,    default=lambda: datetime.now(timezone.utc),
+                                           onupdate=lambda: datetime.now(timezone.utc))
 
     user    = db.relationship('User', back_populates='timetables')
     entries = db.relationship(
@@ -113,8 +110,8 @@ class TimetableEntry(db.Model):
     id           = db.Column(db.Integer, primary_key=True)
     timetable_id = db.Column(db.Integer, db.ForeignKey('timetables.id'), nullable=False)
     unit_code    = db.Column(db.String(12), nullable=False)
-    alt_idx      = db.Column(db.Integer,    default=0)  # 0 = default slot
-    position     = db.Column(db.Integer,    default=0)  # display order
+    alt_idx      = db.Column(db.Integer,    default=0)
+    position     = db.Column(db.Integer,    default=0)
 
     timetable = db.relationship('Timetable', back_populates='entries')
 
@@ -123,14 +120,13 @@ class TimetableEntry(db.Model):
 
 
 # ── Friendship ────────────────────────────────────────────────────────
-# Stored as two rows (A→B and B→A) so queries stay simple.
 class Friendship(db.Model):
     __tablename__ = 'friendships'
 
     id         = db.Column(db.Integer, primary_key=True)
     user_id    = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     friend_id  = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
         db.UniqueConstraint('user_id', 'friend_id', name='uq_friendship'),
@@ -141,7 +137,6 @@ class Friendship(db.Model):
 
     @staticmethod
     def make(user_id: int, friend_id: int):
-        """Create both directions of a friendship atomically."""
         return [
             Friendship(user_id=user_id,   friend_id=friend_id),
             Friendship(user_id=friend_id, friend_id=user_id),
@@ -184,7 +179,7 @@ class FriendRequest(db.Model):
     id           = db.Column(db.Integer, primary_key=True)
     sender_id    = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     recipient_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    sent_at      = db.Column(db.DateTime, default=datetime.utcnow)
+    sent_at      = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
         db.UniqueConstraint('sender_id', 'recipient_id', name='uq_friend_request'),
@@ -192,3 +187,16 @@ class FriendRequest(db.Model):
 
     sender    = db.relationship('User', foreign_keys=[sender_id],    back_populates='sent_requests')
     recipient = db.relationship('User', foreign_keys=[recipient_id], back_populates='recv_requests')
+
+
+# ── TimetableView ─────────────────────────────────────────────────────
+class TimetableView(db.Model):
+    __tablename__ = 'timetable_views'
+
+    id           = db.Column(db.Integer,  primary_key=True)
+    timetable_id = db.Column(db.Integer,  db.ForeignKey('timetables.id'), nullable=False)
+    viewer_id    = db.Column(db.Integer,  db.ForeignKey('users.id'),      nullable=False)
+    viewed_at    = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    timetable = db.relationship('Timetable', foreign_keys=[timetable_id])
+    viewer    = db.relationship('User',      foreign_keys=[viewer_id])
