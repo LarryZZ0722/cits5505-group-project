@@ -13,6 +13,7 @@ Other modules
   models.py  — SQLAlchemy models (User, Timetable, Friendship, …)
   utils.py   — Shared helpers (current_user, ok, err, load_courses, …)
   seed.py    — Demo data, runs automatically on every startup
+  limiter.py — Shared Flask-Limiter instance
 
 Start the server
     cd back-end
@@ -26,6 +27,7 @@ from flask_jwt_extended import JWTManager
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from models import db, User, Friendship
 from utils import err
+from limiter import limiter
 from auth import auth_bp
 from users import users_bp
 from timetables import timetables_bp
@@ -38,7 +40,7 @@ from stats import stats_bp
 # ── App & config ──────────────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-app = Flask(__name__)  # templates/ and static/ live inside back-end/ by convention
+app = Flask(__name__)
 app.config.update(
     SECRET_KEY                     = os.environ.get('SECRET_KEY', 'dev-secret-change-in-production'),
     SQLALCHEMY_DATABASE_URI        = f'sqlite:///{os.path.join(BASE_DIR, "planner.db")}',
@@ -51,6 +53,7 @@ app.config.update(
 db.init_app(app)
 jwt = JWTManager(app)
 csrf = CSRFProtect(app)
+limiter.init_app(app)
 app.register_blueprint(auth_bp)
 app.register_blueprint(users_bp)
 app.register_blueprint(timetables_bp)
@@ -64,7 +67,7 @@ _CSRF_EXEMPT = ('/api/auth/login', '/api/auth/register', '/api/health')
 
 @app.before_request
 def check_csrf():
-    if app.testing:                          # skip in unit tests
+    if app.testing:
         return
     if request.method not in ('POST', 'PUT', 'PATCH', 'DELETE'):
         return
@@ -131,8 +134,11 @@ def invalid_token(_):
 def expired_token(*_):
     return err('Token expired — please log in again', 401)
 
+# ── Debug endpoint — gated behind debug mode (closes #37) ─────────────
 @app.get('/api/debug/seed')
 def debug_seed():
+    if not app.debug:
+        return err('Not found', 404)
     rows = []
     for u in User.query.all():
         for tt in u.timetables:
