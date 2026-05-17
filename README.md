@@ -19,10 +19,10 @@ A web application that helps University of Western Australia students plan their
 
 | UWA ID | Name | GitHub username |
 |--------|------|-----------------|
-| 24701844 | Thanh Hung Nguyen | 24701844 |
-| 23456790 | Zicheng Zeng | 24728085 |
+| 24701844 | Thanh Hung Nguyen | 12er90 |
+| 23456790 | Zicheng Zeng | LarryZZ0722 |
 | 24692035 | Chris Sajimon Joseph | ChrisSajimon |
-| 23456792 | Student Four | github-username-4 |
+| 23456792 | Kalp Riteshkumar Prajapati Prajapati | kalp224 |
 
 ---
 
