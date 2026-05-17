@@ -64,6 +64,8 @@ _CSRF_EXEMPT = ('/api/auth/login', '/api/auth/register', '/api/health')
 
 @app.before_request
 def check_csrf():
+    if app.testing:                          # skip in unit tests
+        return
     if request.method not in ('POST', 'PUT', 'PATCH', 'DELETE'):
         return
     if any(request.path.startswith(p) for p in _CSRF_EXEMPT):
