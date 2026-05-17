@@ -338,17 +338,19 @@ function renderPagination(total) {
   }
 
   el.innerHTML = `
-    <button class="page-btn" id="prevPageBtn" ${tablePage === 0 ? "disabled" : ""}>
-      Prev
-    </button>
+    <div class="pagination-controls">
+      <button class="page-nav-btn" id="prevPageBtn" ${tablePage === 0 ? "disabled" : ""}>
+        ← Prev
+      </button>
 
-    <span class="text-[12px] text-[var(--text2)] px-2">
-      Page ${tablePage + 1} of ${pages}
-    </span>
+      <span class="page-status">
+        Page ${tablePage + 1} of ${pages}
+      </span>
 
-    <button class="page-btn" id="nextPageBtn" ${tablePage >= pages - 1 ? "disabled" : ""}>
-      Next
-    </button>
+      <button class="page-nav-btn" id="nextPageBtn" ${tablePage >= pages - 1 ? "disabled" : ""}>
+        Next →
+      </button>
+    </div>
   `;
 
   document.getElementById("prevPageBtn")?.addEventListener("click", async () => {
@@ -364,7 +366,6 @@ function renderPagination(total) {
   });
 }
 
-/* ── Toggle course in/out of selection ───── */
 /* ── Toggle course in/out of selection ───── */
 async function toggleCourse(code) {
   if (!State.getUser()) {
