@@ -222,3 +222,139 @@ button, input, select, textarea { font-family:var(--sans); }
   #toast-container { right:12px; bottom:12px; }
   #summaryBar > div + div { border-left:none; border-top:1px solid var(--border); }
 }
+
+/* ── Loading skeletons ───────────────────── */
+.skeleton {
+  display: block;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    var(--bg3) 25%,
+    var(--border) 37%,
+    var(--bg3) 63%
+  );
+  background-size: 400% 100%;
+  animation: skeleton-loading 1.2s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+.skeleton-row td {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.skeleton-code {
+  width: 72px;
+  height: 14px;
+}
+
+.skeleton-title {
+  width: 190px;
+  height: 14px;
+  margin-bottom: 8px;
+}
+
+.skeleton-subtitle {
+  width: 120px;
+  height: 10px;
+}
+
+.skeleton-pill {
+  width: 42px;
+  height: 20px;
+}
+
+.skeleton-tag {
+  width: 56px;
+  height: 20px;
+}
+
+.skeleton-button {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+}
+
+/* ── Schedule skeletons ─────────────────── */
+.skeleton-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.skeleton-sidebar-line {
+  width: 120px;
+  height: 12px;
+}
+
+.skeleton-summary-number {
+  width: 42px;
+  height: 28px;
+}
+
+.skeleton-summary-label {
+  width: 84px;
+  height: 10px;
+}
+
+.skeleton-legend-code {
+  width: 56px;
+  height: 12px;
+}
+
+.skeleton-legend-name {
+  width: 140px;
+  height: 12px;
+}
+
+.skeleton-class-block {
+  width: calc(100% - 8px);
+  height: 46px;
+  margin: 3px 4px;
+  border-radius: 10px;
+}
+
+.skeleton-card-bar {
+  width: 3px;
+  align-self: stretch;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.skeleton-card-code {
+  width: 70px;
+  height: 11px;
+  margin-bottom: 8px;
+}
+
+.skeleton-card-title {
+  width: 180px;
+  max-width: 80%;
+  height: 16px;
+}
+
+.skeleton-card-button {
+  width: 72px;
+  height: 30px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.skeleton-card-session {
+  width: 220px;
+  max-width: 90%;
+  height: 18px;
+}
+
+.skeleton-card-session.short {
+  width: 160px;
+}

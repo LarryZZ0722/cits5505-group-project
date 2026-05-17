@@ -20,6 +20,7 @@ let editingCode   = null;  // code of custom unit being edited (issue #23)
 document.addEventListener("DOMContentLoaded", async () => {
   const loggedIn = !!State.getUser();
 
+  renderCourseTableSkeleton();
   if (!loggedIn) {
     document.getElementById("basketCard")?.style.setProperty("display", "none");
     document.getElementById("manualCard")?.style.setProperty("display", "none");
@@ -223,6 +224,36 @@ function getFilteredCourses() {
 }
 
 /* ── Table ───────────────────────────────── */
+
+function renderCourseTableSkeleton() {
+  const tbody = document.getElementById("courseTableBody");
+  if (!tbody) return;
+
+  tbody.innerHTML = Array.from({ length: PAGE_SIZE }, () => `
+    <tr class="skeleton-row">
+      <td><div class="skeleton skeleton-code"></div></td>
+      <td>
+        <div class="skeleton skeleton-title"></div>
+        <div class="skeleton skeleton-subtitle"></div>
+      </td>
+      <td><div class="skeleton skeleton-pill"></div></td>
+      <td>
+        <div class="flex flex-wrap gap-1">
+          <div class="skeleton skeleton-tag"></div>
+          <div class="skeleton skeleton-tag"></div>
+        </div>
+      </td>
+      <td><div class="skeleton skeleton-button"></div></td>
+    </tr>
+  `).join("");
+
+  const tableCount = document.getElementById("tableCount");
+  if (tableCount) tableCount.textContent = "Loading units...";
+
+  const pagination = document.getElementById("pagination");
+  if (pagination) pagination.innerHTML = "";
+}
+
 function renderTable() {
   const courses = getFilteredCourses();
   const start   = tablePage * PAGE_SIZE;
@@ -296,68 +327,74 @@ function renderPagination(total) {
 }
 
 /* ── Toggle course in/out of selection ───── */
-/* ── Toggle course in/out of selection ───── */
 async function toggleCourse(code) {
   if (!State.getUser()) {
     window.location.href = "/auth";
     return;
   }
 
-  const previousSelected = [...selected];
-  const previousCourses = [...allCourses];
-
   const wasAdded = selected.some(x => x.code === code);
+  const course = allCourses.find(c => c.code === code);
 
   if (wasAdded) {
+    const previousSelected = [...selected];
+
     selected = selected.filter(x => x.code !== code);
-
-    const course = allCourses.find(c => c.code === code);
-    if (course?.custom) {
-      allCourses = allCourses.filter(c => c.code !== code);
-    }
-  } else {
-    selected = [...selected, { code, altIdx: 0 }];
-  }
-
-  patchTableRow(code, !wasAdded);
-  renderBasket();
-
-  const saved = await saveSelected();
-
-  if (!saved) {
-    selected = previousSelected;
-    allCourses = previousCourses;
-
-    patchTableRow(code, wasAdded);
+    patchTableRow(code, false);
     renderBasket();
     updateNavBadge(selected.length);
 
-    toast(
-      wasAdded
-        ? `Could not remove ${code}. Please check your connection and try again.`
-        : `Could not add ${code}. Please check your connection and try again.`,
-      "error"
-    );
+    const saved = await saveSelected();
 
-    return;
-  }
-
-  if (wasAdded) {
-    const course = previousCourses.find(c => c.code === code);
+    if (!saved) {
+      selected = previousSelected;
+      patchTableRow(code, true);
+      renderBasket();
+      updateNavBadge(selected.length);
+      toast(`Could not remove ${code}. Please try again.`, "error");
+      return;
+    }
 
     if (course?.custom) {
       try {
         await API.deleteCustomCourse(code);
+
+        allCourses = allCourses.filter(c => c.code !== code);
+        renderTable();
       } catch (e) {
         console.error("deleteCustomCourse failed:", e);
-        toast(`Removed ${code}, but could not delete the custom unit`, "error");
+
+        selected = previousSelected;
+        patchTableRow(code, true);
+        renderBasket();
+        updateNavBadge(selected.length);
+
+        toast(`Could not delete ${code}. Please try again.`, "error");
+        return;
       }
     }
 
     toast(`${code} removed`);
-  } else {
-    toast(`${code} added`, "success");
+    return;
   }
+
+  selected = [...selected, { code, altIdx: 0 }];
+  patchTableRow(code, true);
+  renderBasket();
+  updateNavBadge(selected.length);
+
+  const saved = await saveSelected();
+
+  if (!saved) {
+    selected = selected.filter(x => x.code !== code);
+    patchTableRow(code, false);
+    renderBasket();
+    updateNavBadge(selected.length);
+    toast(`Could not add ${code}. Please try again.`, "error");
+    return;
+  }
+
+  toast(`${code} added`, "success");
 }
 
 function patchTableRow(code, isAdded) {
